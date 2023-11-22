@@ -23,13 +23,12 @@ int main(){
     InitWindow(Board_Size+60,Board_Size+90,"GobangCat");
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     //加载玩家：
-    auto human=new HumanPlayer();
-    human->PlayerColor=PieceStatus::Black;
-    Players[0]=human;
-    auto robot=new ChessTreeRobot();
-   // robot->EnableTreeSearch=false;
-    robot->PlayerColor=PieceStatus::White;
-    Players[1]=robot;
+    Players[0] = (new HumanPlayer())
+            ->SetPlayer(PieceStatus::Black);
+    Players[1] = (new ChessTreeRobot())
+            ->SetPlayer(PieceStatus::White)
+            ->SetEvaluator(EvaluatorType::ModelChecking)
+            ->SetTreeDepth(20);
 
     //是否有人胜出：
     bool wined=false;

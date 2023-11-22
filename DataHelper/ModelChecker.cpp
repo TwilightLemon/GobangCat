@@ -203,215 +203,215 @@ vector<ChessModel> ModelChecker::RankModel(const vector<ChessModel>& models){
 //检索双方符合的模型，预判可能的步骤
 vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     vector<ChessModel> result;
+    //region 检索模型
+    auto Check=[&](const vector<Point>& p,ModelType type,const vector<vector<int>>& rules){
+        //如果五个点为空则退出
+        bool empty=true;
+        int pointCount=rules[0].size();
+        for(int i=0;i<pointCount;i++){
+            if(!p[i].EmptyInMap(map)){
+                empty= false;
+                break;
+            }
+        }
+        if(empty)return;
+
+        ChessModel Model;
+        Model.type=type;
+        vector<Point> ava,points;
+
+        int rulesCount=rules.size();
+        //匹配模型类型
+        //规则示例：-101113，其中0表示空，1表示有子且相等，-1表示有子且不相等，2表示不匹配任何子，3表示优先落子
+        //相等子是谁的
+        PieceStatus owner=PieceStatus::None;
+        auto detect=[&]() {
+            for (int i = 0; i < rulesCount; i++) {
+                bool match = true;
+                for (int j = 0; j < pointCount; j++) {
+                    if (rules[i][j] == 1) {
+                        if (p[j].EmptyInMap(map)) {
+                            match = false;
+                            break;
+                        }
+                        if (owner == PieceStatus::None) {
+                            owner = map[p[j].x][p[j].y];
+                        }
+                        if (!p[j].EqualInMap(owner, map)) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    else if(rules[i][j]==-1){
+                        if (p[j].EmptyInMap(map)) {
+                            match = false;
+                            break;
+                        }
+                        if (owner == PieceStatus::None) {
+                            owner = Opponent(map[p[j].x][p[j].y]);
+                        }
+                        if (p[j].EqualInMap(owner, map)) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    else if (rules[i][j] == 0||rules[i][j]==3) {
+                        if (!p[j].EmptyInMap(map)) {
+                            match = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (match) {
+                    for (int j = 0; j < pointCount; j++) {
+                        if (rules[i][j] == 0||rules[i][j]==3) {
+                            //如果已经存在则不重复添加
+                            bool found = false;
+                            for(const auto& point:ava)
+                                if(point.x==p[j].x&&point.y==p[j].y){
+                                    found=true;
+                                    break;
+                                }
+                            if(found)continue;
+
+                            if(rules[i][j]==3/*||((j<4&&rules[i][j+1]==1)||(j>0&&rules[i][j-1]==1))*/)
+                                ava.insert(ava.begin(),p[j]);
+                            else ava.push_back(p[j]);
+                        }else if(type==ModelType::Win){
+                            ava.push_back(p[j]);
+                        }
+                    }
+                }
+            }
+        };
+        detect();
+
+
+        if(!ava.empty()){
+            for(int i=0;i<pointCount;i++)
+                points.push_back(p[i]);
+            Model.whose=owner;
+            Model.ava=ava;
+            Model.points=points;
+            result.push_back(Model);
+        }
+
+    };
+    auto CheckCube=[&](const vector<vector<Point>>& p,ModelType type,const int rules[5]){
+        //如果点全为空点则退出
+        bool empty=true;
+        for(const auto& points:p)
+            for(const auto& point:points){
+                if(!point.EmptyInMap(map)){
+                    empty= false;
+                    break;
+                }
+            }
+        if(empty)return;
+
+        ChessModel Model;
+        Model.type=type;
+        vector<Point> ava,points;
+        //匹配模型类型
+        //规则示例：01110，其中0表示空，1表示有子且相等
+        //相等子是谁的
+        PieceStatus owner=PieceStatus::None;
+        bool match=true;
+        for(int i=0;i<5;i++){
+            if(rules[i]==1){
+                if(p[0][i].EmptyInMap(map)||p[1][i].EmptyInMap(map)){
+                    match=false;
+                    break;
+                }
+                if(owner==PieceStatus::None){
+                    owner=map[p[0][i].x][p[0][i].y];
+                }
+                if(!(p[0][i].EqualInMap(owner,map)&&p[1][i].EqualInMap(owner,map))){
+                    match=false;
+                    break;
+                }
+            }
+            else if(rules[i]==0){
+                if(!p[0][i].EmptyInMap(map)){
+                    return;
+                }
+            }
+        }
+        if(match){
+            //只记录交点处的空子坐标(only)
+            for(int i=0;i<5;i++){
+                if(rules[i]==0){
+                    ava.push_back(p[0][i]);
+                    break;
+                }
+            }
+        }
+
+        if(!ava.empty()){
+            for(int px=0;px<2;px++) for(int i=0;i<5;i++)
+                    points.push_back(p[px][i]);
+
+            Model.whose=owner;
+            Model.ava=ava;
+            Model.points=points;
+            result.push_back(Model);
+        }
+    };
+    auto CheckWin=[&](vector<Point>& plist){
+        //匹配五子连珠
+        vector<vector<int>> ruleWin={{1,1,1,1,1}};
+        Check(plist,ModelType::H4,ruleWin);
+    };
+    auto CheckCubeAll=[&](const vector<vector<Point>>& plist){
+        //双向匹配
+        //匹配双活四
+        int ruleCube[5]={0,1,1,1,1};
+        CheckCube(plist,ModelType::Cube4,ruleCube);
+        //匹配双活三
+        int ruleCubeH3[5]={0,1,1,1,2};
+        CheckCube(plist,ModelType::Cube3,ruleCubeH3);
+        //匹配双活二
+        int ruleCubeM2[5]={0,1,1,2,2};
+        CheckCube(plist,ModelType::Cube2,ruleCubeM2);
+    };
+    auto CheckH4=[&](vector<Point>& plist){
+        vector<vector<int>> ruleH4={{1,1,1,1,0},
+                                    {1,1,1,0,1},
+                                    {1,1,0,1,1}};
+        Check(plist,ModelType::H4,ruleH4);
+    };
+    auto CheckM4=[&](vector<Point>& plist){
+        //匹配眠四
+        vector<vector<int>> ruleM4={{-1,0,1,1,1,3},
+                                    {2,1,3,1,1,0},
+                                    {0,3,1,1,1,3,0}};
+        Check(plist,ModelType::M4,ruleM4);
+    };
+    auto CheckH3=[&](vector<Point>& plist){
+        //匹配活三和眠三
+        vector<vector<int>> ruleH3={{0,3,1,1,1,-1},
+                                    {0,1,3,1,1,-1},
+                                    {0,1,1,3,1,-1},
+                                    {1,0,0,1,1,2},
+                                    {1,0,1,0,1,2},
+                                    {-1,0,1,1,1,0,-1}};
+        Check(plist,ModelType::H3,ruleH3);
+    };
+    auto CheckM2=[&](vector<Point>& plist){
+        //匹配眠二
+        vector<vector<int>> ruleM2={{0,3,1,1,0,0},
+                                    {0,1,0,1,0,2},
+                                    {2,1,0,0,1,2},
+                                    {0,0,3,1,1,-1},
+                                    {0,0,1,3,1,-1},
+                                    {0,1,3,3,1,-1},
+                                    {1,3,0,3,1,2}};
+        Check(plist,ModelType::M2,ruleM2);
+    };
+    //endregion
     for(int x=0;x<15;x++) {
         for (int y = 0; y < 15; y++) {
-            //endregion
-            //region 检索模型
-            auto Check=[&](const vector<Point>& p,ModelType type,const vector<vector<int>>& rules){
-                //如果五个点为空则退出
-                bool empty=true;
-                int pointCount=rules[0].size();
-                for(int i=0;i<pointCount;i++){
-                    if(!p[i].EmptyInMap(map)){
-                        empty= false;
-                        break;
-                    }
-                }
-                if(empty)return;
-
-                ChessModel Model;
-                Model.type=type;
-                vector<Point> ava,points;
-
-                int rulesCount=rules.size();
-                //匹配模型类型
-                //规则示例：-101113，其中0表示空，1表示有子且相等，-1表示有子且不相等，2表示不匹配任何子，3表示优先落子
-                //相等子是谁的
-                PieceStatus owner=PieceStatus::None;
-                auto detect=[&]() {
-                    for (int i = 0; i < rulesCount; i++) {
-                        bool match = true;
-                        for (int j = 0; j < pointCount; j++) {
-                            if (rules[i][j] == 1) {
-                                if (p[j].EmptyInMap(map)) {
-                                    match = false;
-                                    break;
-                                }
-                                if (owner == PieceStatus::None) {
-                                    owner = map[p[j].x][p[j].y];
-                                }
-                                if (!p[j].EqualInMap(owner, map)) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-                            else if(rules[i][j]==-1){
-                                if (p[j].EmptyInMap(map)) {
-                                    match = false;
-                                    break;
-                                }
-                                if (owner == PieceStatus::None) {
-                                    owner = Opponent(map[p[j].x][p[j].y]);
-                                }
-                                if (p[j].EqualInMap(owner, map)) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-                            else if (rules[i][j] == 0||rules[i][j]==3) {
-                                if (!p[j].EmptyInMap(map)) {
-                                    match = false;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (match) {
-                            for (int j = 0; j < pointCount; j++) {
-                                if (rules[i][j] == 0||rules[i][j]==3) {
-                                    //如果已经存在则不重复添加
-                                    bool found = false;
-                                    for(const auto& point:ava)
-                                        if(point.x==p[j].x&&point.y==p[j].y){
-                                            found=true;
-                                            break;
-                                        }
-                                    if(found)continue;
-
-                                    if(rules[i][j]==3/*||((j<4&&rules[i][j+1]==1)||(j>0&&rules[i][j-1]==1))*/)
-                                        ava.insert(ava.begin(),p[j]);
-                                    else ava.push_back(p[j]);
-                                }else if(type==ModelType::Win){
-                                    ava.push_back(p[j]);
-                                }
-                            }
-                        }
-                    }
-                };
-                detect();
-
-
-                if(!ava.empty()){
-                    for(int i=0;i<pointCount;i++)
-                        points.push_back(p[i]);
-                    Model.whose=owner;
-                    Model.ava=ava;
-                    Model.points=points;
-                    result.push_back(Model);
-                }
-
-            };
-            auto CheckCube=[&](const vector<vector<Point>>& p,ModelType type,const int rules[5]){
-                //如果点全为空点则退出
-                bool empty=true;
-                for(const auto& points:p)
-                    for(const auto& point:points){
-                        if(!point.EmptyInMap(map)){
-                            empty= false;
-                            break;
-                        }
-                    }
-                if(empty)return;
-
-                ChessModel Model;
-                Model.type=type;
-                vector<Point> ava,points;
-                //匹配模型类型
-                //规则示例：01110，其中0表示空，1表示有子且相等
-                //相等子是谁的
-                PieceStatus owner=PieceStatus::None;
-                bool match=true;
-                for(int i=0;i<5;i++){
-                    if(rules[i]==1){
-                        if(p[0][i].EmptyInMap(map)||p[1][i].EmptyInMap(map)){
-                            match=false;
-                            break;
-                        }
-                        if(owner==PieceStatus::None){
-                            owner=map[p[0][i].x][p[0][i].y];
-                        }
-                        if(!(p[0][i].EqualInMap(owner,map)&&p[1][i].EqualInMap(owner,map))){
-                            match=false;
-                            break;
-                        }
-                    }
-                    else if(rules[i]==0){
-                        if(!p[0][i].EmptyInMap(map)){
-                            return;
-                        }
-                    }
-                }
-                if(match){
-                    //只记录交点处的空子坐标(only)
-                    for(int i=0;i<5;i++){
-                        if(rules[i]==0){
-                            ava.push_back(p[0][i]);
-                            break;
-                        }
-                    }
-                }
-
-                if(!ava.empty()){
-                    for(int px=0;px<2;px++) for(int i=0;i<5;i++)
-                            points.push_back(p[px][i]);
-
-                    Model.whose=owner;
-                    Model.ava=ava;
-                    Model.points=points;
-                    result.push_back(Model);
-                }
-            };
-            auto CheckWin=[&](vector<Point>& plist){
-                //匹配五子连珠
-                vector<vector<int>> ruleWin={{1,1,1,1,1}};
-                Check(plist,ModelType::H4,ruleWin);
-            };
-            auto CheckCubeAll=[&](const vector<vector<Point>>& plist){
-                //双向匹配
-                //匹配双活四
-                int ruleCube[5]={0,1,1,1,1};
-                CheckCube(plist,ModelType::Cube4,ruleCube);
-                //匹配双活三
-                int ruleCubeH3[5]={0,1,1,1,2};
-                CheckCube(plist,ModelType::Cube3,ruleCubeH3);
-                //匹配双活二
-                int ruleCubeM2[5]={0,1,1,2,2};
-                CheckCube(plist,ModelType::Cube2,ruleCubeM2);
-            };
-            auto CheckH4=[&](vector<Point>& plist){
-                vector<vector<int>> ruleH4={{1,1,1,1,0},
-                                            {1,1,1,0,1},
-                                            {1,1,0,1,1}};
-                Check(plist,ModelType::H4,ruleH4);
-            };
-            auto CheckM4=[&](vector<Point>& plist){
-                //匹配眠四
-                vector<vector<int>> ruleM4={{0,1,1,1,0},
-                                            {1,3,1,1,0}};
-                Check(plist,ModelType::M4,ruleM4);
-            };
-            auto CheckH3=[&](vector<Point>& plist){
-                //匹配活三和眠三
-                vector<vector<int>> ruleH3={{0,3,1,1,1,-1},
-                                            {0,1,3,1,1,-1},
-                                            {0,1,1,3,1,-1},
-                                            {1,0,0,1,1,2},
-                                            {1,0,1,0,1,2},
-                                            {-1,0,1,1,1,0,-1}};
-                Check(plist,ModelType::H3,ruleH3);
-            };
-            auto CheckM2=[&](vector<Point>& plist){
-                //匹配眠二
-                vector<vector<int>> ruleM2={{0,3,1,1,0,0},
-                                            {0,1,0,1,0,2},
-                                            {2,1,0,0,1,2},
-                                            {0,0,3,1,1,-1},
-                                            {0,0,1,3,1,-1},
-                                            {0,1,3,3,1,-1},
-                                            {1,3,0,3,1,2}};
-                Check(plist,ModelType::M2,ruleM2);
-            };
-            //endregion
             vector<vector<Point>> region;
             //region 遍历所有可能的五个点
             if(y<=10) {

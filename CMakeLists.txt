@@ -17,6 +17,8 @@ add_executable(GobangCat
         DataHelper/ChessTree.cpp
         DataHelper/ChessTree.h
         DataHelper/ModelChecker.cpp
-        DataHelper/ModelChecker.h)
+        DataHelper/ModelChecker.h
+        DataHelper/CountingEvaluator.cpp
+        DataHelper/CountingEvaluator.h)
 find_package(raylib)
 target_link_libraries(GobangCat raylib)

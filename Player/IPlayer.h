@@ -20,13 +20,35 @@ public:
 class HumanPlayer : public IPlayer
 {
 public:
+    HumanPlayer* SetPlayer(PieceStatus player){
+        this->PlayerColor=player;
+        return this;
+    }
     Point NextStep() override;
+};
+enum EvaluatorType{
+    Counting,
+    ModelChecking
 };
 class ChessTreeRobot : public IPlayer
 {
     public:
+    ChessTreeRobot* SetEvaluator(EvaluatorType type){
+        this->Evaluator=type;
+        return this;
+    }
+    ChessTreeRobot* SetPlayer(PieceStatus player){
+        this->PlayerColor=player;
+        return this;
+    }
+    ChessTreeRobot* SetTreeDepth(int depth){
+        this->TreeDepth=depth;
+        return this;
+    }
     Point NextStep() override;
+    int TreeDepth=4;
     bool EnableTreeSearch=true;
+    EvaluatorType Evaluator;
 };
 
 #endif

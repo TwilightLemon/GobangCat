@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "../DataHelper/ModelChecker.h"
 #include "../DataHelper/ChessTree.h"
+#include "../DataHelper/CountingEvaluator.h"
 
 using namespace std;
 
@@ -59,7 +60,10 @@ Point ChessTreeRobot::NextStep() {
     }
     //endregion
     //region 评估当前局面：
-    int score=ModelChecker::Evaluate(this->PlayerColor,MapData);
+    int score;
+    if(this->Evaluator==EvaluatorType::Counting)
+        score=CountingEvaluator::Evaluate(this->PlayerColor,MapData);
+    else score=ModelChecker::Evaluate(this->PlayerColor,MapData);
     cout<<"Present Score: "<<score<<endl;
     //endregion
     //region 猜测对手
@@ -74,10 +78,14 @@ Point ChessTreeRobot::NextStep() {
         //region 搜索博弈树，预算分数
         auto tree=new ChessTree();
         //装配估值器
-        tree->Evaluator=ModelChecker::Evaluate;
+        if(this->Evaluator==EvaluatorType::Counting)
+            //使用计数估值器
+            tree->Evaluator=CountingEvaluator::Evaluate;
+        //使用模型匹配估值器
+        else tree->Evaluator=ModelChecker::Evaluate;
         //装配可走点生成器
         tree->AvaPointGenerator=ModelChecker::GetAvaPoints;
-        tree->GenerateTree(10, this->PlayerColor);
+        tree->GenerateTree(this->TreeDepth, this->PlayerColor);
         auto result = tree->AlphaBetaSearch();
         delete tree;
         return result->point;
