@@ -21,6 +21,7 @@ IPlayer* Players[2];
 
 int main(){
     InitWindow(Board_Size+60,Board_Size+90,"GobangCat");
+    SetTargetFPS(15);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     //加载玩家：
     Players[0] = (new HumanPlayer())
@@ -28,7 +29,7 @@ int main(){
     Players[1] = (new ChessTreeRobot())
             ->SetPlayer(PieceStatus::White)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetTreeDepth(20);
+            ->SetTreeDepth(10);
 
     //是否有人胜出：
     bool wined=false;

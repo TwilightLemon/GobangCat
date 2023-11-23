@@ -25,11 +25,8 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
             avaPoints.push_back(p);
             count++;
         }
-        if(count>=5)
-            break;
     }
     if(count==0) {
-        cout<<"Random ADD TO THE TREE!"<<endl;
         avaPoints.push_back((new RandomRobot())->NextStep());
     }
     return avaPoints;
@@ -45,7 +42,7 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
     for(const auto& model:mlist){
         float p=1;
         if(model.whose!=player)
-            p=-1.2;
+            p=-1;
         auto RepeatCheck=[](const Point& p,int& counter,vector<Point>& list,PieceStatus player){
             //如果该点已经存在，则不重复添加
             bool found = false;
@@ -65,7 +62,9 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
         }
         switch (model.type) {
             case ModelType::Win:
-                return 90000*p;
+                if(model.whose!=player)
+                    return -100000;
+                else return INT_MAX;
             case ModelType::H4:
                 H4+=10000*p;
                 cH4++;
@@ -99,12 +98,12 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
         }
     }
     //求平均
-    if(cH4!=0)
+/*    if(cH4!=0)
         H4/=cH4;
     if(cH3!=0)
         H3/=cH3;
     if(cM2!=0)
-        M2/=cM2;
+        M2/=cM2;*/
     int score=H4+H3+M2;
     if(player==PieceStatus::Black){
         score*=1.0+(float)Rep_Black/10.0;
@@ -327,13 +326,23 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                 if(owner==PieceStatus::None){
                     owner=map[p[0][i].x][p[0][i].y];
                 }
-                if(!(p[0][i].EqualInMap(owner,map)&&p[1][i].EqualInMap(owner,map))){
+                //落子可为空 不为敌方 至少有一个我方
+                int score=0;
+                if(p[0][i].EqualInMap(owner,map))
+                    score++;
+                else if(!p[0][i].EqualInMap(Opponent(owner),map))
+                    score--;
+                if(p[1][i].EqualInMap(owner,map))
+                    score++;
+                else if(!p[1][i].EqualInMap(Opponent(owner),map))
+                    score--;
+                if(score<=0){
                     match=false;
                     break;
                 }
             }
             else if(rules[i]==0){
-                if(!p[0][i].EmptyInMap(map)){
+                if(!p[0][i].EmptyInMap(map)||!p[1][i].EmptyInMap(map)){
                     return;
                 }
             }
@@ -372,7 +381,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         int ruleCubeH3[5]={0,1,1,1,2};
         CheckCube(plist,ModelType::Cube3,ruleCubeH3);
         //匹配双活二
-        int ruleCubeM2[5]={0,1,1,2,2};
+        int ruleCubeM2[5]={0,1,1,0,2};
         CheckCube(plist,ModelType::Cube2,ruleCubeM2);
     };
     auto CheckH4=[&](vector<Point>& plist){
@@ -384,6 +393,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     auto CheckM4=[&](vector<Point>& plist){
         //匹配眠四
         vector<vector<int>> ruleM4={{-1,0,1,1,1,3},
+                                    {0,1,1,1,0,2},
                                     {2,1,3,1,1,0},
                                     {0,3,1,1,1,3,0}};
         Check(plist,ModelType::M4,ruleM4);
@@ -403,6 +413,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         vector<vector<int>> ruleM2={{0,3,1,1,0,0},
                                     {0,1,0,1,0,2},
                                     {2,1,0,0,1,2},
+                                    {0,3,1,0,1,-1},
                                     {0,0,3,1,1,-1},
                                     {0,0,1,3,1,-1},
                                     {0,1,3,3,1,-1},

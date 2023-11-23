@@ -4,11 +4,12 @@
 
 #include <iostream>
 #include "ChessTree.h"
-#include "../Player/IPlayer.h"
-#include "ModelChecker.h"
+#include <chrono>
+using namespace std::chrono;
 
 void ChessTree::GenerateTree(int depth, PieceStatus player) {
     cout<<"Generating Tree..."<<endl;
+    auto begin=high_resolution_clock::now();
     this->maxDepth=depth;
     this->root=new ChessNode();
     this->root->map=&MapData;
@@ -53,7 +54,8 @@ void ChessTree::GenerateTree(int depth, PieceStatus player) {
         for(const auto& node:parent->children)
             parents.push(node);
     }
-    cout<<"Tree Generated!"<<endl;
+    auto end=high_resolution_clock::now();
+    cout<<"Tree Generated!  Time Cost: "<<duration_cast<milliseconds>(end-begin).count()<<"ms"<<endl;
 }
 void ChessTree::ShowTree()const {
     auto root=this->root;
@@ -75,6 +77,7 @@ void ChessTree::ShowTree()const {
 }
 ChessNode* ChessTree::AlphaBetaSearch()const{
     cout<<"Searching Started."<<endl;
+    auto begin=high_resolution_clock::now();
     ChessNode* result;
     auto root=this->root;
     ChessNode* parent=root;
@@ -160,6 +163,7 @@ ChessNode* ChessTree::AlphaBetaSearch()const{
         parent = parent->parent->parent;
     }
       ShowTree();
-    cout<<"Searching Finished."<<endl;
+    auto end=high_resolution_clock::now();
+    cout<<"Searching Finished!  Time Cost: "<<duration_cast<milliseconds>(end-begin).count()<<"ms"<<endl;
     return result;
 }
