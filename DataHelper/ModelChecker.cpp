@@ -411,7 +411,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     auto CheckM2=[&](vector<Point>& plist){
         //匹配眠二
         vector<vector<int>> ruleM2={{0,3,1,1,0,0},
-                                    {0,1,0,1,0,2},
+                                    {0,1,3,1,0,2},
                                     {2,1,0,0,1,2},
                                     {0,3,1,0,1,-1},
                                     {0,0,3,1,1,-1},

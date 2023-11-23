@@ -11,7 +11,7 @@ const int PieceSize =20;
 const int GridSize =  60;
 
 //defined at DataType.h
-ChessMap MapData={PieceStatus::None};
+ChessMap MapData=new PieceStatus[15][15]{PieceStatus::None};
 //记录每一步的历史
 stack<Point> StepHistory;
 //黑子先手
@@ -29,7 +29,7 @@ int main(){
     Players[1] = (new ChessTreeRobot())
             ->SetPlayer(PieceStatus::White)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetTreeDepth(10);
+            ->SetTreeDepth(4);
 
     //是否有人胜出：
     bool wined=false;

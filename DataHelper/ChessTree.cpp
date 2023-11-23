@@ -10,50 +10,73 @@ using namespace std::chrono;
 void ChessTree::GenerateTree(int depth, PieceStatus player) {
     cout<<"Generating Tree..."<<endl;
     auto begin=high_resolution_clock::now();
+
     this->maxDepth=depth;
     this->root=new ChessNode();
-    this->root->map=&MapData;
+    this->root->map=MapData;
     this->root->score=this->Evaluator(player, MapData);
     this->root->depth=0;
     this->root->parent= nullptr;
-    stack<ChessNode*> parents;
-    parents.push(this->root);
     //第一层节点由对手下产生
     PieceStatus nodePlayer=Opponent(player);
+    //root下一层的可走点根据现有棋局产生
+    this->root->NextAvaPoints=this->AvaPointGenerator(MapData);
     this->root->whose=nodePlayer;
-    for(int i=1;i<depth;i++){
-        //第i+1层节点，由CheckModel给出我方可走的点，预判对手可走点
-        //对每个点，生成一个节点，计算分数
-        nodePlayer=Opponent(nodePlayer);
-        ChessNode* parent;
-        while(!parents.empty()) {
-            //上一层的节点作为父节点(多个)
-            parent = parents.top();
-            vector<Point> avaPoints= this->AvaPointGenerator(*parent->map);
-            //生成子节点
-            for(auto p:avaPoints){
-                auto node = new ChessNode();
-                node->depth = i;
-                node->parent = parent;
-                node->point=p;
-                ChessMap newMap;
-                std::copy(&(*parent->map)[0][0], &(*parent->map)[0][0] + 15 * 15, &newMap[0][0]);
-                newMap[p.x][p.y] = nodePlayer;
-                //只生成节点，估分由alpha-beta剪枝算法计算
-                //node->score = Evaluate(player, newMap);
-                node->score=0;
-                node->map = &newMap;
-                //该层节点玩家
-                node->whose = nodePlayer;
-                //将节点加入父节点的子节点列表
-                parent->children.push_back(node);
-            }
-            parents.pop();
+
+    auto parent=this->root;
+    auto newMap=new PieceStatus[15][15];
+    for(int x=0;x<15;x++){
+        for(int y=0;y<15;y++){
+            newMap[x][y]=parent->map[x][y];
         }
-        //将第i+1层节点作为父节点，继续生成第i+2层节点
-        for(const auto& node:parent->children)
-            parents.push(node);
     }
+
+    for(int i=1;i<=depth;i++){
+        //一直生成到第depth层
+        auto node = new ChessNode();
+        Point p=parent->NextAvaPoints[0];
+        parent->NextAvaPoints.erase(parent->NextAvaPoints.begin());
+        node->depth = i;
+        node->parent = parent;
+        node->point=p;
+        newMap[p.x][p.y] = nodePlayer;
+        node->score=0;
+        node->map = newMap;
+        //该层节点玩家
+        node->whose = nodePlayer;
+        node->NextAvaPoints = this->AvaPointGenerator(newMap);
+        parent->children.push_back(node);
+        parent=node;
+        /*//打印newMap打印为棋盘
+        for(int x=0;x<15;x++){
+            for(int y=0;y<15;y++){
+                if(newMap[y][x]==PieceStatus::None)
+                    cout<<"- ";
+                else if(newMap[y][x]==PieceStatus::Black)
+                    cout<<"B ";
+                else cout<<"W ";
+            }
+            cout<<endl;
+        }
+        cout<<"ADD NODE!!!  Depth: "<<node->depth<<"  Whose: "<<(node->whose==PieceStatus::Black?"Black":"White")<<" Point:"<<node->point.x<<","<<node->point.y<<endl;
+        */
+    }
+    //此时来到最底层节点->parent
+    int score = this->Evaluator(parent->whose, parent->map);
+    parent->score = score;
+    auto IntroPtr=parent;
+    //回溯更新父节点分数
+    while(IntroPtr->depth!=0){
+        IntroPtr->parent->score=score;
+        IntroPtr=parent->parent;
+    }
+    //往上走一级，撤销最后一步
+    parent->map[parent->point.x][parent->point.y]=PieceStatus::None;
+    parent=parent->parent;
+    //暂存：生成完的NextAvaPoints就弹出，这样就可以知道何时停止...
+
+
+
     auto end=high_resolution_clock::now();
     cout<<"Tree Generated!  Time Cost: "<<duration_cast<milliseconds>(end-begin).count()<<"ms"<<endl;
 }
@@ -144,7 +167,7 @@ ChessNode* ChessTree::AlphaBetaSearch()const{
         ChessNode *TopScored = parent;
         for (auto &child: parent->parent->children) {
             //计算所有子节点分数，根据利于该局玩家的规则估分
-            int s = this->Evaluator(child->whose, *child->map);
+            int s = this->Evaluator(child->whose, child->map);
             child->score = s;
             //该局为我方所下产生，则父节点为对手，我方的最小分数方向是对方的最大分数方向
             if (child->whose == benefitWhom) {

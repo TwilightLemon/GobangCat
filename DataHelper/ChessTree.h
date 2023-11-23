@@ -12,8 +12,9 @@
 //博弈树的节点
 class ChessNode{
 public:
-    ChessMap* map; // 棋盘状态
-    Point point;
+    PieceStatus (*map)[15]; // 棋盘状态
+    Point point;// 落子点
+    vector<Point> NextAvaPoints; // 下一步可走点
     int score; // 评分
     int depth; // 深度
     PieceStatus whose; // 轮到谁下

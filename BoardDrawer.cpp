@@ -22,11 +22,9 @@ void BoardDrawer::ResetStep(){
 void BoardDrawer::Restart() {
     ResetStep();
     //重新开始：
-    for(auto & x : MapData){
-        for(auto & y : x){
-            y=PieceStatus::None;
-        }
-    }
+    for(int x=0;x<15;x++)
+        for(int y=0;y<15;y++)
+            MapData[x][y]=PieceStatus::None;
     CurrentPlayer=PieceStatus::Black;
 }
 void BoardDrawer::RegretAStep(int stepCount){

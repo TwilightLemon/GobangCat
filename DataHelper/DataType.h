@@ -18,7 +18,7 @@ static PieceStatus Opponent(const PieceStatus& player)
 {
     return player==PieceStatus::Black?PieceStatus::White:PieceStatus::Black;
 }
-typedef PieceStatus ChessMap[15][15];
+typedef PieceStatus (*ChessMap)[15];
 extern ChessMap MapData;
 extern PieceStatus CurrentPlayer;
 
