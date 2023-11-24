@@ -8,6 +8,17 @@
 
 
 vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
+    cout<<"MODELCHECKER::Current Map:"<<endl;
+    for(int x=0;x<15;x++){
+        for(int y=0;y<15;y++){
+            if(map[y][x]==PieceStatus::None)
+                cout<<"- ";
+            else if(map[y][x]==PieceStatus::Black)
+                cout<<"B ";
+            else cout<<"W ";
+        }
+        cout<<endl;
+    }
     auto list = ModelChecker::CheckModel(map);
     vector<Point> avaPoints;
     int count=0;
@@ -24,6 +35,7 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
             if (found)continue;
             avaPoints.push_back(p);
             count++;
+            if(count>=5)break;
         }
     }
     if(count==0) {
@@ -330,11 +342,11 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                 int score=0;
                 if(p[0][i].EqualInMap(owner,map))
                     score++;
-                else if(!p[0][i].EqualInMap(Opponent(owner),map))
+                else if(!p[0][i].EqualInMap(owner,map))
                     score--;
                 if(p[1][i].EqualInMap(owner,map))
                     score++;
-                else if(!p[1][i].EqualInMap(Opponent(owner),map))
+                else if(!p[1][i].EqualInMap(owner,map))
                     score--;
                 if(score<=0){
                     match=false;

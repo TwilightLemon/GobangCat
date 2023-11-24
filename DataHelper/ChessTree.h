@@ -34,6 +34,8 @@ public:
     //获取可走点
     vector<Point> (*AvaPointGenerator)(const ChessMap& map);
     ChessNode* root;
+    //指示对哪一方有利
+    PieceStatus BenefitPlayer;
     int maxDepth;
 };
 

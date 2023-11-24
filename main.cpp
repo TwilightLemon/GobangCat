@@ -28,7 +28,7 @@ int main(){
             ->SetPlayer(PieceStatus::Black);
     Players[1] = (new ChessTreeRobot())
             ->SetPlayer(PieceStatus::White)
-            ->SetEvaluator(EvaluatorType::ModelChecking)
+            ->SetEvaluator(EvaluatorType::Counting)
             ->SetTreeDepth(4);
 
     //是否有人胜出：
