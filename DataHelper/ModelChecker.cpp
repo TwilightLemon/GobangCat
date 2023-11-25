@@ -8,7 +8,7 @@
 
 
 vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
-    cout<<"MODELCHECKER::Current Map:"<<endl;
+    /*cout<<"MODELCHECKER::Current Map:"<<endl;
     for(int x=0;x<15;x++){
         for(int y=0;y<15;y++){
             if(map[y][x]==PieceStatus::None)
@@ -18,7 +18,7 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
             else cout<<"W ";
         }
         cout<<endl;
-    }
+    }*/
     auto list = ModelChecker::CheckModel(map);
     vector<Point> avaPoints;
     int count=0;
@@ -35,8 +35,8 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
             if (found)continue;
             avaPoints.push_back(p);
             count++;
-            if(count>=5)break;
         }
+        if(count>=5)break;
     }
     if(count==0) {
         avaPoints.push_back((new RandomRobot())->NextStep());
@@ -233,7 +233,11 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
 
         int rulesCount=rules.size();
         //匹配模型类型
-        //规则示例：-101113，其中0表示空，1表示有子且相等，-1表示有子且不相等，2表示不匹配任何子，3表示优先落子
+        //规则示例：-101113
+        // 其中0表示空子但不作为Ava，1表示有子且相等
+        // -1表示有子且不相等
+        // 2表示不匹配任何子
+        // 3表示优先落子
         //相等子是谁的
         PieceStatus owner=PieceStatus::None;
         auto detect=[&]() {
@@ -276,7 +280,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
 
                 if (match) {
                     for (int j = 0; j < pointCount; j++) {
-                        if (rules[i][j] == 0||rules[i][j]==3) {
+                        if (/*rules[i][j] == 0||*/rules[i][j]==3) {
                             //如果已经存在则不重复添加
                             bool found = false;
                             for(const auto& point:ava)
@@ -286,9 +290,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                                 }
                             if(found)continue;
 
-                            if(rules[i][j]==3/*||((j<4&&rules[i][j+1]==1)||(j>0&&rules[i][j-1]==1))*/)
-                                ava.insert(ava.begin(),p[j]);
-                            else ava.push_back(p[j]);
+                            ava.push_back(p[j]);
                         }else if(type==ModelType::Win){
                             ava.push_back(p[j]);
                         }
@@ -397,37 +399,37 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         CheckCube(plist,ModelType::Cube2,ruleCubeM2);
     };
     auto CheckH4=[&](vector<Point>& plist){
-        vector<vector<int>> ruleH4={{1,1,1,1,0},
-                                    {1,1,1,0,1},
-                                    {1,1,0,1,1}};
+        vector<vector<int>> ruleH4={{1,1,1,1,3},
+                                    {1,1,1,3,1},
+                                    {1,1,3,1,1}};
         Check(plist,ModelType::H4,ruleH4);
     };
     auto CheckM4=[&](vector<Point>& plist){
         //匹配眠四
         vector<vector<int>> ruleM4={{-1,0,1,1,1,3},
-                                    {0,1,1,1,0,2},
-                                    {2,1,3,1,1,0},
+                                    {3,1,1,1,3,2},
+                                    {2,1,3,1,1,3},
                                     {0,3,1,1,1,3,0}};
         Check(plist,ModelType::M4,ruleM4);
     };
     auto CheckH3=[&](vector<Point>& plist){
         //匹配活三和眠三
         vector<vector<int>> ruleH3={{0,3,1,1,1,-1},
-                                    {0,1,3,1,1,-1},
-                                    {0,1,1,3,1,-1},
-                                    {1,0,0,1,1,2},
-                                    {1,0,1,0,1,2},
-                                    {-1,0,1,1,1,0,-1}};
+                                    {3,1,3,1,1,-1},
+                                    {3,1,1,3,1,-1},
+                                    {1,3,3,1,1,2},
+                                    {1,3,1,3,1,2},
+                                    {-1,3,1,1,1,3,-1}};
         Check(plist,ModelType::H3,ruleH3);
     };
     auto CheckM2=[&](vector<Point>& plist){
         //匹配眠二
-        vector<vector<int>> ruleM2={{0,3,1,1,0,0},
+        vector<vector<int>> ruleM2={{0,3,1,1,3,0},
                                     {0,1,3,1,0,2},
-                                    {2,1,0,0,1,2},
-                                    {0,3,1,0,1,-1},
+                                    {2,1,3,3,1,2},
+                                    {0,3,1,3,1,-1},
                                     {0,0,3,1,1,-1},
-                                    {0,0,1,3,1,-1},
+                                    {0,3,1,3,1,-1},
                                     {0,1,3,3,1,-1},
                                     {1,3,0,3,1,2}};
         Check(plist,ModelType::M2,ruleM2);

@@ -43,11 +43,14 @@ void ChessTree::ShowTree()const {
             parents.push(node);
     }
 }
-ChessNode* ChessTree::AlphaBetaSearch()const{
+Point ChessTree::AlphaBetaSearch()const{
     cout<<"Searching Started."<<endl;
     auto begin=high_resolution_clock::now();
     ChessNode* result;
-
+    if(this->root->NextAvaPoints.size()==1){
+        //如果root节点只有一个点，则返回root的第一个子节点
+        return root->NextAvaPoints[0];
+    }
     //拷贝一份map
     auto parent=this->root;
     auto newMap=new PieceStatus[15][15];
@@ -58,22 +61,24 @@ ChessNode* ChessTree::AlphaBetaSearch()const{
     }
     PieceStatus nodePlayer=this->root->whose;
     int depth=this->maxDepth;
+    int count=0;
     while(true) {
         if(parent->NextAvaPoints.empty()) {
             //如果该层节点没有可走点(已检索完成)，则向上一层
-            parent = parent->parent;
             if(parent->depth==0) {
                 //查找root->children中最大的score
                 int maxScore=INT_MIN;
+                for(const auto& node:parent->children)
+                    cout<<"ROOT CHILDREN SCORE: "<<node->score<<"  Point at: "<<node->point.x<<","<<node->point.y<<endl;
                 for(const auto& node:parent->children){
                     if(node->score>maxScore){
                         maxScore=node->score;
                         result=node;
-                        break;
                     }
                 }
                 break;
             }
+            parent = parent->parent;
             continue;
         }
         for (int i = parent->depth+1; i < depth; i++) {
@@ -86,14 +91,14 @@ ChessNode* ChessTree::AlphaBetaSearch()const{
             node->parent = parent;
             node->point = p;
             newMap[p.x][p.y] = nodePlayer;
-            node->score = INT_MIN;
+            //如果是己方节点(Max)，则初始化分数为最小值，否则为最大值
+            node->score = nodePlayer== this->BenefitPlayer ? INT_MIN : INT_MAX;
             node->map = newMap;
             //该层节点玩家
             node->whose = nodePlayer;
             node->NextAvaPoints = this->AvaPointGenerator(newMap);
             parent->children.push_back(node);
             parent = node;
-            //cout<<"ADD NODE!!!  Depth: "<<node->depth<<"  Whose: "<<(node->whose==PieceStatus::Black?"Black":"White")<<" Point:"<<node->point.x<<","<<node->point.y<<endl;
         }
         while (!parent->NextAvaPoints.empty()) {
             //最后一层节点
@@ -103,23 +108,40 @@ ChessNode* ChessTree::AlphaBetaSearch()const{
             newMap[p.x][p.y] = nodePlayer;
             //计算该节点分数
             int score = this->Evaluator(this->BenefitPlayer, newMap);
+            cout<<"Count: "<<++count<<"  Depth: "<<parent->depth<<"  Whose: "<<(parent->whose==PieceStatus::Black?"Black":"White")<<" Point:"<<p.x<<","<<p.y<<"  Score: "<<score<<endl;
             auto IntroPtr = parent;
-            //回溯更新父节点分数
-            if (parent->whose == this->BenefitPlayer) {//Max结点
-                if (score > parent->score)//如果该节点分数大于父节点分数，则更新父节点分数
-                    while (IntroPtr->depth != 0) {
-                        IntroPtr->score = score;
-                        IntroPtr = IntroPtr->parent;
+            bool skip=false;
+            while(IntroPtr->depth!=0){
+                if (IntroPtr->whose == this->BenefitPlayer){//Max节点
+                    if(score>IntroPtr->score){
+                        IntroPtr->score=score;
+                    }else{
+                        if(IntroPtr->depth!=parent->depth) {
+                            //剪枝
+                            skip = true;
+                            break;
+                        }
                     }
-            } else {//Min结点
-                if (score < parent->score)//如果该节点分数小于父节点分数，则更新父节点分数
-                    while (IntroPtr->depth != 0) {
-                        IntroPtr->score = score;
-                        IntroPtr = IntroPtr->parent;
+                }else{//Min节点
+                    if(score<IntroPtr->score){
+                        IntroPtr->score=score;
+                    }else{
+                        if(IntroPtr->depth!=parent->depth) {
+                            //剪枝
+                            skip = true;
+                            break;
+                        }
                     }
+                }
+                IntroPtr=IntroPtr->parent;
             }
             //更新完成之后撤销更改
             newMap[p.x][p.y] = PieceStatus::None;
+            //如果发生剪枝，则不再生成该节点的子节点
+            if(skip) {
+                parent->NextAvaPoints.clear();
+                break;
+            }
         }
         //撤销更改并向上一层
         newMap[parent->point.x][parent->point.y] = PieceStatus::None;
@@ -128,5 +150,5 @@ ChessNode* ChessTree::AlphaBetaSearch()const{
 
     auto end=high_resolution_clock::now();
     cout<<"Searching Finished!  Time Cost: "<<duration_cast<milliseconds>(end-begin).count()<<"ms"<<endl;
-    return result;
+    return result->point;
 }

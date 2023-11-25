@@ -88,7 +88,7 @@ Point ChessTreeRobot::NextStep() {
         tree->GenerateTree(this->TreeDepth, this->PlayerColor);
         auto result = tree->AlphaBetaSearch();
         delete tree;
-        return result->point;
+        return result;
         //endregion
     }else return list[0].ava[0];
 }

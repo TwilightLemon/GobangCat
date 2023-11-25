@@ -27,7 +27,7 @@ public:
     //根据现有局面展开树
     void GenerateTree(int depth,PieceStatus player);
     //搜索最佳落子点
-    [[nodiscard]] ChessNode* AlphaBetaSearch()const;
+    [[nodiscard]] Point AlphaBetaSearch()const;
     void ShowTree()const;
     //评估对player一方的分数
     int (*Evaluator)(PieceStatus player, const ChessMap& map);
