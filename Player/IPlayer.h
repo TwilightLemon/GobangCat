@@ -45,6 +45,10 @@ class ChessTreeRobot : public IPlayer
         this->TreeDepth=depth;
         return this;
     }
+    ChessTreeRobot* SetEnableTreeSearch(bool enable){
+        this->EnableTreeSearch=enable;
+        return this;
+    }
     Point NextStep() override;
     int TreeDepth=4;
     bool EnableTreeSearch=true;
