@@ -74,7 +74,7 @@ Point ChessTreeRobot::NextStep() {
             AvaPointsOfOpponent.push_back(p);
     cout<<"Predicted Points Count: "<<AvaPointsOfOpponent.size()<<endl;
     //endregion
-    if(this->EnableTreeSearch/*&&StepHistory.size()>=10*/) {
+    if(this->EnableTreeSearch&&StepHistory.size()>=this->SkipStepCount*2) {
         //region 搜索博弈树，预算分数
         auto tree=new ChessTree();
         //装配估值器

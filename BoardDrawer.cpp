@@ -3,6 +3,7 @@
 //
 
 #include "BoardDrawer.h"
+#include "DataHelper/ModelChecker.h"
 #include <iostream>
 #include <thread>
 
@@ -54,6 +55,7 @@ void BoardDrawer::Round(int sleepTime){
     MapData[p.x][p.y]=CurrentPlayer;
     ExchangePlayer();
     StepHistory.push(p);
+
     if(sleepTime!=0)this_thread::sleep_for(chrono::milliseconds(sleepTime));
 }
 

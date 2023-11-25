@@ -28,7 +28,6 @@ public:
     void GenerateTree(int depth,PieceStatus player);
     //搜索最佳落子点
     [[nodiscard]] Point AlphaBetaSearch()const;
-    void ShowTree()const;
     //评估对player一方的分数
     int (*Evaluator)(PieceStatus player, const ChessMap& map);
     //获取可走点

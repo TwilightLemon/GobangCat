@@ -25,24 +25,7 @@ void ChessTree::GenerateTree(int depth, PieceStatus player) {
     auto end=high_resolution_clock::now();
     cout<<"Tree Generated!  Time Cost: "<<duration_cast<milliseconds>(end-begin).count()<<"ms"<<endl;
 }
-void ChessTree::ShowTree()const {
-    auto root=this->root;
-    stack<ChessNode*> parents;
-    parents.push(root);
-    for(int i=0;i<this->maxDepth;i++) {
-        ChessNode* parent;
-        while (!parents.empty()) {
-            parent = parents.top();
-            for (const auto &node: parent->children) {
-                cout << "Depth: " << node->depth << "  Whose: " <<(node->whose==PieceStatus::Black?"Black":"White")<<" Point:"<<node->point.x<<","<<node->point.y << endl;
-            }
-            parents.pop();
-        }
-        cout<<"-----------------"<<endl;
-        for (const auto &node: parent->children)
-            parents.push(node);
-    }
-}
+
 Point ChessTree::AlphaBetaSearch()const{
     cout<<"Searching Started."<<endl;
     auto begin=high_resolution_clock::now();

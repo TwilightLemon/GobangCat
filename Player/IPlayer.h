@@ -49,8 +49,13 @@ class ChessTreeRobot : public IPlayer
         this->EnableTreeSearch=enable;
         return this;
     }
+    ChessTreeRobot* SetSkipStepCount(int count){
+        this->SkipStepCount=count;
+        return this;
+    }
     Point NextStep() override;
     int TreeDepth=4;
+    int SkipStepCount=0;
     bool EnableTreeSearch=true;
     EvaluatorType Evaluator;
 };

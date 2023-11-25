@@ -24,6 +24,13 @@ public:
     //空子坐标
     vector<Point> ava;
 };
+class ChessModel_Single{
+public:
+    ModelType type;
+    Point ava;
+    Point point;
+    PieceStatus whose;
+};
 
 class ModelChecker {
 public:

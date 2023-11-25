@@ -21,9 +21,14 @@ static PieceStatus Opponent(const PieceStatus& player)
 typedef PieceStatus (*ChessMap)[15];
 extern ChessMap MapData;
 extern PieceStatus CurrentPlayer;
+static void ShowMap(const ChessMap& map);
 
 struct Point{
     int x,y;
+    [[nodiscard]]
+    bool Equal(const Point p) const{
+        return x==p.x&&y==p.y;
+    }
     [[nodiscard]]
     bool EmptyInMap(const ChessMap& map) const{
         if(x<0||x>=15||y<0||y>=15)return false;
