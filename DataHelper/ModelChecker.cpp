@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "ModelChecker.h"
 #include "../Player/IPlayer.h"
+#include "CountingEvaluator.h"
 
 
 vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
@@ -43,9 +44,7 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
     auto mlist=CheckModel(map);
     int H4=0,H3=0,M2=0;
     for(const auto& model:mlist){
-        float p=1;
-        if(model.whose!=player)
-            p=-1;
+        float p=model.whose==player?1:-1;
         switch (model.type) {
             case ModelType::Win:
                 if(model.whose!=player)
@@ -58,10 +57,10 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
                 H4+=3000*p;
                 break;
             case ModelType::M4:
-                H4+=1000*p;
+                H4+=2000*p;
                 break;
             case ModelType::Cube3:
-                H4+=800*p;
+                H4+=600*p;
                 break;
             case ModelType::H3:
                 H3+=500*p;
@@ -76,7 +75,7 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
                 break;
         }
     }
-    int score=H4+H3+M2;
+    int score=H4+H3+M2+CountingEvaluator::Evaluate(player,map);
     return score;
 }
 
@@ -282,15 +281,15 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     };
     auto CheckM4=[&](vector<Point>& plist){
         //匹配眠四
-        vector<vector<int>> ruleM4={{-1,0,1,1,1,3},
+        vector<vector<int>> ruleM4={
                                     {3,1,1,1,3,2},
-                                    {2,1,3,1,1,3},
-                                    {0,3,1,1,1,3,0}};
+                                    {2,1,3,1,1,3}};
         Check(plist,ModelType::M4,ruleM4);
     };
     auto CheckH3=[&](vector<Point>& plist){
         //匹配活三和眠三
-        vector<vector<int>> ruleH3={{0,3,1,1,1,-1},
+        vector<vector<int>> ruleH3={{-1,0,1,1,1,3},
+                                    {0,3,1,1,1,-1},
                                     {3,1,3,1,1,-1},
                                     {3,1,1,3,1,-1},
                                     {1,3,3,1,1,2},
@@ -419,9 +418,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                     ChessModel m;
                     //TODO:调整定级
                     ModelType most=model.type>foundModel.type?model.type:foundModel.type;
-                    if(most==ModelType::M2)
-                    m.type = ModelType::Cube2;
-                    else if(most==ModelType::H3)
+                    if(most==ModelType::M2||most==ModelType::H3)
                         m.type=ModelType::Cube3;
                     else
                         m.type=ModelType::Cube4;

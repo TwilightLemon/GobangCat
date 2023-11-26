@@ -31,7 +31,7 @@ public:
     //反悔一步
     static void RegretAStep(int stepCount);
     //进行一轮博弈
-    static void Round(int sleepTime=0);
+    static void Round(int sleepTime=0,bool CheckModel=false);
     //绘制棋盘背景
     static void DrawBackground();
     //根据MapData绘制棋子

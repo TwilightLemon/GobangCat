@@ -4,11 +4,12 @@
 
 #include <iostream>
 #include "ChessTree.h"
+#include "../InfoBoard.h"
 #include <chrono>
 using namespace std::chrono;
 
 void ChessTree::GenerateTree(int depth, PieceStatus player) {
-    cout<<"Generating Tree..."<<endl;
+    InfoBoard::CatSays("待我耕耘一颗树...ᓚᘏᗢ");
     auto begin=high_resolution_clock::now();
     this->BenefitPlayer=player;
     this->maxDepth=depth;
@@ -23,15 +24,15 @@ void ChessTree::GenerateTree(int depth, PieceStatus player) {
     this->root->NextAvaPoints=this->AvaPointGenerator(MapData);
     this->root->whose=nodePlayer;
     auto end=high_resolution_clock::now();
-    cout<<"Tree Generated!  Time Cost: "<<duration_cast<milliseconds>(end-begin).count()<<"ms"<<endl;
-}
+    }
 
 Point ChessTree::AlphaBetaSearch()const{
-    cout<<"Searching Started."<<endl;
+    InfoBoard::CatSays("开始搜索博弈树...");
     auto begin=high_resolution_clock::now();
     ChessNode* result;
     if(this->root->NextAvaPoints.size()==1){
         //如果root节点只有一个点，则返回root的第一个子节点
+        InfoBoard::CatSays("算了吧 没什么可搜的ㄟ( ▔, ▔ )ㄏ",TextColor::Green);
         return root->NextAvaPoints[0];
     }
     //拷贝一份map
@@ -52,7 +53,7 @@ Point ChessTree::AlphaBetaSearch()const{
                 //查找root->children中最大的score
                 int maxScore=INT_MIN;
                 for(const auto& node:parent->children)
-                    cout<<"ROOT CHILDREN SCORE: "<<node->score<<"  Point at: "<<node->point.x<<","<<node->point.y<<endl;
+                   InfoBoard::CatSays("Point "+to_string(node->point.x)+" "+to_string(node->point.y)+" Score:"+to_string(node->score));
                 for(const auto& node:parent->children){
                     if(node->score>maxScore){
                         maxScore=node->score;
@@ -91,7 +92,7 @@ Point ChessTree::AlphaBetaSearch()const{
             newMap[p.x][p.y] = nodePlayer;
             //计算该节点分数
             int score = this->Evaluator(this->BenefitPlayer, newMap);
-            cout<<"Count: "<<++count<<"  Depth: "<<parent->depth<<"  Whose: "<<(parent->whose==PieceStatus::Black?"Black":"White")<<" Point:"<<p.x<<","<<p.y<<"  Score: "<<score<<endl;
+            count++;
             auto IntroPtr = parent;
             bool skip=false;
             while(IntroPtr->depth!=0){
@@ -130,8 +131,8 @@ Point ChessTree::AlphaBetaSearch()const{
         newMap[parent->point.x][parent->point.y] = PieceStatus::None;
         parent = parent->parent;
     }
-
     auto end=high_resolution_clock::now();
-    cout<<"Searching Finished!  Time Cost: "<<duration_cast<milliseconds>(end-begin).count()<<"ms"<<endl;
+    InfoBoard::CatSays("已经暴力搜索"+to_string(count)+"个对局了！");
+    InfoBoard::CatSays("搜索完成，耗时"+to_string(duration_cast<milliseconds>(end-begin).count())+"ms");
     return result->point;
 }

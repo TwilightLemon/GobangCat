@@ -19,7 +19,7 @@ int CountingEvaluator::Evaluate(PieceStatus player, const ChessMap &map) {
             else opp++;
         }
         if(me == 5)
-            return 500000;
+            return 120000;
         if(opp == 5)
             return -100000;
         if(me == 4 && empty == 1)

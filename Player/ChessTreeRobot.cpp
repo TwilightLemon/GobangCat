@@ -5,6 +5,7 @@
 #include "../DataHelper/ModelChecker.h"
 #include "../DataHelper/ChessTree.h"
 #include "../DataHelper/CountingEvaluator.h"
+#include "../InfoBoard.h"
 
 using namespace std;
 
@@ -19,7 +20,7 @@ vector<Point> AvaPointsOfOpponent;
 int predictCount=0;
 
 Point ChessTreeRobot::NextStep() {
-    system("cls");
+    InfoBoard::Clear();
     //region 看一下模型能预判到对手多少点
     bool found = false;
     Point olast={-1,-1};
@@ -39,40 +40,16 @@ Point ChessTreeRobot::NextStep() {
     auto list= ModelChecker::CheckModel(MapData);
     //region 没有匹配到模型，随便下
     if(list.empty()){
-        cout<<"RANDOM  "<<list.size()<<endl;
+        InfoBoard::CatSays("我先随便下咯~",TextColor::Blue);
         return (new RandomRobot())->NextStep();
     }
     //endregion
-    //region 调试信息
-    cout<<"-------------Checked Model Count: "<<list.size()<<"-------------"<<endl;
-    for(const auto& model:list){
-        cout<<"Whose: "<<(model.whose==PieceStatus::Black?"Black":"White")<<endl;
-        cout<<"Model: "<<ChessModel::GetModelName(model.type)<<endl;
-        cout<<"Ava: ";
-        for(auto p:model.ava) {
-            cout << p.x << " " << p.y << "   ";
-        }
-        cout<<endl;
-        cout<<"Points: ";
-        for(auto p:model.points)
-            cout<<p.x<<" "<<p.y<<"   ";
-        cout<<endl;
-    }
-    //endregion
-    //region 评估当前局面：
-    int score;
-    if(this->Evaluator==EvaluatorType::Counting)
-        score=CountingEvaluator::Evaluate(this->PlayerColor,MapData);
-    else score=ModelChecker::Evaluate(this->PlayerColor,MapData);
-    cout<<"Present Score: "<<score<<endl;
-    //endregion
     //region 猜测对手
     if(found)
-        cout<<"Predicted Opponent's Last Step: ("<<olast.x<<","<<olast.y<<") "<<predictCount<<" times!"<<endl;
+       InfoBoard::CatSays("你的走位尽在我的计算之中... ("+ to_string(predictCount)+" times)",TextColor::Blue);
     for(const auto &item:list)
         for(const auto& p:item.ava)
             AvaPointsOfOpponent.push_back(p);
-    cout<<"Predicted Points Count: "<<AvaPointsOfOpponent.size()<<endl;
     //endregion
     if(this->EnableTreeSearch&&StepHistory.size()>=this->SkipStepCount*2) {
         //region 搜索博弈树，预算分数
@@ -90,5 +67,6 @@ Point ChessTreeRobot::NextStep() {
         delete tree;
         return result;
         //endregion
-    }else return list[0].ava[0];
+    }
+    else return list[0].ava[0];
 }

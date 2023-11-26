@@ -39,11 +39,12 @@ void BoardDrawer::RegretAStep(int stepCount){
     }
     if(count%2==1)ExchangePlayer();
 }
-void BoardDrawer::Round(int sleepTime){
+void BoardDrawer::Round(int sleepTime,bool CheckModel){
     //绘制当前玩家：
     string current= "CurrentPlayer: ";
     current.append(CurrentPlayer==PieceStatus::Black?"Black":"White");
     DrawText(current.c_str(),20,Board_Size+40,20,BLACK);
+    auto list =CheckModel?ModelChecker::CheckModel(MapData):vector<ChessModel>();
     Point p;
     if(Players[0]->PlayerColor==CurrentPlayer) {
         p = Players[0]->NextStep();
@@ -55,7 +56,24 @@ void BoardDrawer::Round(int sleepTime){
     MapData[p.x][p.y]=CurrentPlayer;
     ExchangePlayer();
     StepHistory.push(p);
-
+    if(CheckModel) {
+        //region 调试信息
+        cout << "-------------Checked Model Count: " << list.size() << "-------------" << endl;
+        for (const auto &model: list) {
+            cout << "Whose: " << (model.whose == PieceStatus::Black ? "Black" : "White") << endl;
+            cout << "Model: " << ChessModel::GetModelName(model.type) << endl;
+            cout << "Ava: ";
+            for (auto p: model.ava) {
+                cout << p.x << " " << p.y << "   ";
+            }
+            cout << endl;
+            cout << "Points: ";
+            for (auto p: model.points)
+                cout << p.x << " " << p.y << "   ";
+            cout << endl;
+        }
+        //endregion
+    }
     if(sleepTime!=0)this_thread::sleep_for(chrono::milliseconds(sleepTime));
 }
 

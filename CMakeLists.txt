@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(GobangCat
         main.cpp
+        InfoBoard.cpp
+        InfoBoard.h
         Player/RandomRobot.cpp
         DataHelper/DataType.h
         BoardDrawer.cpp

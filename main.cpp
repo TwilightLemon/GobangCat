@@ -2,6 +2,7 @@
 // Created by cz241 on 11/3/2023.
 //
 #include "BoardDrawer.h"
+#include "InfoBoard.h"
 
 //defined at BoardDrawer.h
 const float Board_Size=840;
@@ -20,6 +21,7 @@ PieceStatus CurrentPlayer=PieceStatus::Black;
 IPlayer* Players[2];
 
 int main(){
+    system("chcp 65001");
     InitWindow(Board_Size+60,Board_Size+90,"GobangCat");
     SetTargetFPS(15);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -52,7 +54,7 @@ int main(){
 
         //region 如果无人胜出则进行一轮博弈
         if(!ended) {
-            BoardDrawer::Round();
+            BoardDrawer::Round(0,true);
         }
         //endregion
 
@@ -74,6 +76,7 @@ int main(){
 
         //region 悔棋
         if(IsKeyPressed(KEY_UP)){
+            InfoBoard::CatSays("打不过就悔棋是吧- -",TextColor::Red);
             BoardDrawer::RegretAStep(2);
             if(ended)ended=false;
         }
