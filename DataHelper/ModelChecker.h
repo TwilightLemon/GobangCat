@@ -8,8 +8,9 @@
 #include <vector>
 #include "DataType.h"
 
-enum class ModelType{
-    M2,H3,Cube2,Cube3,M4,Cube4,H4,Win
+enum ModelType{
+    //10种模型
+    M2,H2,M3,H3,Cube3,C4,Cube4,H4,Win
 };
 
 class ChessModel{
@@ -37,7 +38,6 @@ public:
     static int Evaluate(PieceStatus player,const ChessMap& map);
     static vector<Point> GetAvaPoints(const ChessMap& map);
     static vector<ChessModel> CheckModel(const ChessMap& map);
-    static vector<ChessModel> RankModel(const vector<ChessModel>& models);
 };
 
 #endif //C2023_CHALLENGE_MODELCHECKER_H

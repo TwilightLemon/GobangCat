@@ -8,11 +8,14 @@
 #include "DataHelper/DataType.h"
 #include "Player/IPlayer.h"
 
+//region UI绘制相关常量
 extern const float Board_Size;
 extern const float Margin;
 extern const int LineThick;
 extern const int PieceSize;
 extern const int GridSize;
+//endregion
+
 extern IPlayer* Players[2];
 
 //负责绘制棋盘和棋子
@@ -38,6 +41,7 @@ public:
     static void DrawPieces();
     //到底是谁在赢这个游戏
     static PieceStatus  IfWined(bool& drew);
+    static void GetWinCount(int& black,int& white);
 };
 
 

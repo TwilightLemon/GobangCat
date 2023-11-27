@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "InfoBoard.h"
+#include "BoardDrawer.h"
 
 static vector<InfoData> chat;
 void InfoBoard::CatSays(std::string text, TextColor color) {
@@ -17,9 +18,19 @@ void DrawCopyRight() {
     cout << "Powered by TwilightLemon" << endl;
     cout << "\033[0m"<<endl;
 }
+void DrawWinCount(){
+    int b,w;
+    BoardDrawer::GetWinCount(b,w);
+    cout << "\033[32m-----------------------------"<<endl;
+    cout << "对局情况: " << endl;
+    cout << "Black: " <<b<< endl;
+    cout << "White: " <<w<< endl;
+    cout << "-----------------------------\033[0m"<<endl;
+}
 void InfoBoard::DrawBoard() {
     system("cls");
     DrawCopyRight();
+    DrawWinCount();
     auto WhiteColor=[](TextColor color){
         switch (color){
             case White:

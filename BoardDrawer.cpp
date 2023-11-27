@@ -4,6 +4,7 @@
 
 #include "BoardDrawer.h"
 #include "DataHelper/ModelChecker.h"
+#include "InfoBoard.h"
 #include <iostream>
 #include <thread>
 
@@ -100,7 +101,11 @@ void BoardDrawer::DrawPieces(){
         }
     }
 }
-
+int WinCount_Black=0,WinCount_White=0;
+void BoardDrawer::GetWinCount(int& black,int& white){
+    black=WinCount_Black;
+    white=WinCount_White;
+}
 PieceStatus  BoardDrawer::IfWined(bool& drew){
     Color LineColor=BLUE;
     Vector2 p_start,p_end;
@@ -144,6 +149,12 @@ PieceStatus  BoardDrawer::IfWined(bool& drew){
     }
     if(IfWin!=PieceStatus::None){
         DrawLineEx(p_start, p_end, LineThick+2, LineColor);
+        if(IfWin==PieceStatus::Black) {
+            WinCount_Black++;
+        }
+        else {
+            WinCount_White++;
+        }
         return IfWin;
     }else{
         if(pieceCount==225){

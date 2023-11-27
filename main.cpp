@@ -35,7 +35,7 @@ int main(){
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetTreeDepth(5);
+            ->SetTreeDepth(6);
 
     //是否已经结束
     bool ended=false;

@@ -52,8 +52,17 @@ Point ChessTree::AlphaBetaSearch()const{
             if(parent->depth==0) {
                 //查找root->children中最大的score
                 int maxScore=INT_MIN;
-                for(const auto& node:parent->children)
-                   InfoBoard::CatSays("Point "+to_string(node->point.x)+" "+to_string(node->point.y)+" Score:"+to_string(node->score));
+                for(const auto& node:parent->children) {
+                    InfoBoard::CatSays("Point " + to_string(node->point.x) + " " + to_string(node->point.y) + " Score:" +to_string(node->score));
+                    string road="Road: ";
+                    auto ptr=node->children[0];
+                    while(ptr->children.size()!=0){
+                        road.append(to_string(ptr->point.x)+" "+to_string(ptr->point.y)+" -> ");
+                        ptr=ptr->children[0];
+                    }
+                    road.append("end");
+                    InfoBoard::CatSays(road);
+                }
                 for(const auto& node:parent->children){
                     if(node->score>maxScore){
                         maxScore=node->score;
@@ -65,8 +74,8 @@ Point ChessTree::AlphaBetaSearch()const{
             parent = parent->parent;
             continue;
         }
-        for (int i = parent->depth+1; i < depth; i++) {
-            //从parent节点开始，一直生成到第depth-1层
+        for (int i = parent->depth+1; i <= depth; i++) {
+            //从parent节点开始，一直生成到第depth层
             nodePlayer = Opponent(nodePlayer);
             auto node = new ChessNode();
             Point p = parent->NextAvaPoints[0];
