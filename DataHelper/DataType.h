@@ -21,7 +21,6 @@ static PieceStatus Opponent(const PieceStatus& player)
 typedef PieceStatus (*ChessMap)[15];
 extern ChessMap MapData;
 extern PieceStatus CurrentPlayer;
-static void ShowMap(const ChessMap& map);
 
 struct Point{
     int x,y;

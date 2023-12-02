@@ -29,16 +29,13 @@ int main(){
     //加载玩家：
     Players[0] = (new HumanPlayer())
             ->SetPlayer(PieceStatus::Black);
-    /*Players[1] = (new HumanPlayer())
+/*    Players[1] = (new HumanPlayer())
             ->SetPlayer(PieceStatus::White);*/
     Players[1] = (new ChessTreeRobot())
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetTreeDepth(6);
-
-    //是否已经结束
-    bool ended=false;
+            ->SetTreeDepth(8);
 
     while(!WindowShouldClose()){
         BeginDrawing();
@@ -53,22 +50,21 @@ int main(){
         //endregion
 
         //region 如果无人胜出则进行一轮博弈
-        if(!ended) {
-            BoardDrawer::Round(0,true);
-        }
+        BoardDrawer::Round();
         //endregion
 
         //region 判断有无胜出
         bool drew=false;//是否和棋
         auto winner=BoardDrawer::IfWined(drew);
         if(winner!=PieceStatus::None || drew){
-            ended=true;
             string win=drew?"No one":(winner==PieceStatus::Black?"Black":"White");
             win.append(" Wined in "+to_string(BoardDrawer::GetSteps())+" steps!");
-            DrawText(win.c_str(),20,Board_Size+40,20,BLACK);
-            DrawText("Press ENTER to restart",20,Board_Size+60,20,BLACK);
+
+            DrawRectangle(0,Board_Size/2-10,Board_Size+60,90,BLUE);
+            DrawText(win.c_str(),20,Board_Size/2+10,30,WHITE);
+            DrawText("Press Enter to Restart",20,Board_Size/2+45,20,WHITE);
+
             if(IsKeyPressed(KEY_ENTER)){
-                ended=false;
                 BoardDrawer::Restart();
             }
         }
@@ -78,7 +74,6 @@ int main(){
         if(IsKeyPressed(KEY_UP)){
             InfoBoard::CatSays("打不过就悔棋是吧- -",TextColor::Red);
             BoardDrawer::RegretAStep(2);
-            if(ended)ended=false;
         }
         //endregion
 

@@ -47,65 +47,41 @@ int CountingEvaluator::Evaluate(PieceStatus player, const ChessMap &map) {
             if(y<=10) {
                 //取纵向+
                 vector<Point> p = { {x, y}, {x, y + 1},  {x, y + 2}, {x, y + 3},  {x, y + 4}};
-                if(y<=9)
-                    p.push_back({x,y+5});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             if(y>=4){
                 //取纵向-
                 vector<Point> p = { {x, y}, {x, y - 1},  {x, y - 2}, {x, y - 3},  {x, y - 4}};
-                if(y>=5)
-                    p.push_back({x,y-5});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             if(x<=10) {
                 //取横向+
                 vector<Point> p = { {x, y}, {x+1, y},  {x+2, y}, {x+3, y},  {x+4, y}};
-                if(x<=9)
-                    p.push_back({x+5,y});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             if(x>=4) {
                 //取横向-
                 vector<Point> p = { {x, y}, {x-1, y},  {x-2, y}, {x-3, y},  {x-4, y}};
-                if(x>=5)
-                    p.push_back({x-5,y});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             if(x<=10&&y<=10) {
                 //取左上到右下
                 vector<Point> p = { {x, y}, {x+1, y + 1},  {x+2, y + 2}, {x+3, y + 3},  {x+4, y + 4}};
-                if(x<=9&&y<=9)
-                    p.push_back({x+5,y+5});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             if(x>=4&&y>=4) {
                 //取左上到右下
                 vector<Point> p = { {x, y}, {x-1, y - 1},  {x-2, y - 2}, {x-3, y - 3},  {x-4, y - 4}};
-                if(x>=5&&y>=5)
-                    p.push_back({x-5,y-5});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             if(x>=4&&y<=10) {
                 //取右上到左下
                 vector<Point> p = { {x, y}, {x-1, y + 1},  {x-2, y + 2}, {x-3, y + 3},  {x-4, y + 4}};
-                if(x>=5&&y<=9)
-                    p.push_back({x-5,y+5});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             if(x<=10&&y>=4) {
                 //取右上到左下
                 vector<Point> p = { {x, y}, {x+1, y - 1},  {x+2, y - 2}, {x+3, y - 3},  {x+4, y - 4}};
-                if(x<=9&&y>=5)
-                    p.push_back({x+5,y-5});
-                else p.push_back({-1,-1});
                 region.push_back(p);
             }
             for(const auto& p:region){

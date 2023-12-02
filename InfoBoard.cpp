@@ -8,8 +8,26 @@
 
 static vector<InfoData> chat;
 void InfoBoard::CatSays(std::string text, TextColor color) {
-    chat.push_back(InfoData(text,color));
-    DrawBoard();
+    auto WhiteColor=[](TextColor color){
+        switch (color){
+            case White:
+                cout<<"\033[37m";
+                break;
+            case Red:
+                cout<<"\033[31m";
+                break;
+            case Blue:
+                cout<<"\033[34m";
+                break;
+            case Green:
+                cout<<"\033[32m";
+                break;
+        }
+    };
+    WhiteColor(color);
+    cout<<"~@GobangCat: "<<text<<endl;
+    /*chat.push_back(InfoData(text,color));
+    DrawBoard();*/
 }
 
 void DrawCopyRight() {
@@ -28,7 +46,7 @@ void DrawWinCount(){
     cout << "-----------------------------\033[0m"<<endl;
 }
 void InfoBoard::DrawBoard() {
-    system("cls");
+   // system("cls");
     DrawCopyRight();
     DrawWinCount();
     auto WhiteColor=[](TextColor color){
@@ -54,6 +72,6 @@ void InfoBoard::DrawBoard() {
     }
 }
 void InfoBoard::Clear() {
-    chat.clear();
-    DrawBoard();
+/*    chat.clear();
+    DrawBoard();*/
 }

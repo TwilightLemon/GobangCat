@@ -17,6 +17,7 @@ public:
     vector<Point> NextAvaPoints; // 下一步可走点
     int score; // 评分
     int depth; // 深度
+    bool destroyed; // 是否已被剪枝
     PieceStatus whose; // 轮到谁下
     ChessNode* parent; // 父节点
     vector<ChessNode*> children; // 子节点
@@ -27,7 +28,7 @@ public:
     //根据现有局面展开树
     void GenerateTree(int depth,PieceStatus player);
     //搜索最佳落子点
-    [[nodiscard]] Point AlphaBetaSearch()const;
+    [[nodiscard]] Point AlphaBetaSearch();
     //评估对player一方的分数
     int (*Evaluator)(PieceStatus player, const ChessMap& map);
     //获取可走点
@@ -36,6 +37,8 @@ public:
     //指示对哪一方有利
     PieceStatus BenefitPlayer;
     int maxDepth;
+    int alpha=INT_MIN;
+    int beta=INT_MAX;
 };
 
 #endif //C2023_CHALLENGE_CHESSTREE_H

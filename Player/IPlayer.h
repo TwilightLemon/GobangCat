@@ -9,6 +9,8 @@ class IPlayer
 {
 public:
     PieceStatus PlayerColor;
+    //是否异步执行NextStep
+    bool EnableAsync=false;
     virtual Point NextStep() = 0;
 };
 
@@ -33,6 +35,9 @@ enum EvaluatorType{
 class ChessTreeRobot : public IPlayer
 {
     public:
+    ChessTreeRobot(){
+        this->EnableAsync=true;
+    }
     ChessTreeRobot* SetEvaluator(EvaluatorType type){
         this->Evaluator=type;
         return this;
