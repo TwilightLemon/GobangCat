@@ -49,15 +49,15 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
             case ModelType::H4:
                 score+=1000000*p;
                 break;
-/*            case ModelType::Cube4:
+            case ModelType::Cube4:
                 score+=100000*p;
-                break;*/
+                break;
             case ModelType::C4:
                 score+=10000*p;
                 break;
-/*            case ModelType::Cube3:
+            case ModelType::Cube3:
                 score+=1500*p;
-                break;*/
+                break;
             case ModelType::H3:
                 score+=1000*p;
                 break;
@@ -229,7 +229,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     auto CheckH3=[&](vector<Point>& plist){
         //匹配活三
         vector<vector<int>> ruleH3={{0,1,1,1,0},
-                                    {2,1,3,1,1}};
+                                    {0,1,3,1,1}};
         Check(plist,ModelType::H3,ruleH3);
     };
     auto CheckM3=[&](vector<Point>& plist){

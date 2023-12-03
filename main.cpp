@@ -26,6 +26,12 @@ int main(){
     SetTargetFPS(15);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
 
+    //加载图像资源
+    Image piece_Black=LoadImage("Resource/cat_black.png");
+    Image piece_White=LoadImage("Resource/cat_white.png");
+    Texture texture_Black=LoadTextureFromImage(piece_Black);
+    Texture texture_White=LoadTextureFromImage(piece_White);
+
     //加载玩家：
     Players[0] = (new HumanPlayer())
             ->SetPlayer(PieceStatus::Black);
@@ -35,7 +41,7 @@ int main(){
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetTreeDepth(8);
+            ->SetTreeDepth(6);
 
     while(!WindowShouldClose()){
         BeginDrawing();
@@ -50,7 +56,7 @@ int main(){
         //endregion
 
         //region 如果无人胜出则进行一轮博弈
-        BoardDrawer::Round();
+        BoardDrawer::Round(0,true);
         //endregion
 
         //region 判断有无胜出

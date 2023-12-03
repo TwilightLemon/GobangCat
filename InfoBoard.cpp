@@ -46,7 +46,7 @@ void DrawWinCount(){
     cout << "-----------------------------\033[0m"<<endl;
 }
 void InfoBoard::DrawBoard() {
-   // system("cls");
+    system("cls");
     DrawCopyRight();
     DrawWinCount();
     auto WhiteColor=[](TextColor color){
@@ -72,6 +72,6 @@ void InfoBoard::DrawBoard() {
     }
 }
 void InfoBoard::Clear() {
-/*    chat.clear();
-    DrawBoard();*/
+    chat.clear();
+    DrawBoard();
 }
