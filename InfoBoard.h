@@ -11,20 +11,11 @@ using namespace std;
 enum TextColor{
     White,Red,Blue,Green
 };
-class InfoData{
-public:
-    string text;
-    TextColor color;
-    InfoData(string text,TextColor color){
-        this->text=text;
-        this->color=color;
-    }
-};
+//负责绘制信息面板
 class InfoBoard {
 public:
     static void CatSays(string text,TextColor color=White);
     static void Clear();
-    static void DrawBoard();
 };
 
 

@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include "../BoardDrawer.h"
 #include "../DataHelper/ModelChecker.h"
 #include "../DataHelper/ChessTree.h"
 #include "../DataHelper/CountingEvaluator.h"
@@ -40,19 +41,21 @@ Point ChessTreeRobot::NextStep() {
     auto list= ModelChecker::CheckModel(MapData);
     //region 没有匹配到模型，随便下
     if(list.empty()){
-        InfoBoard::CatSays("我先随便下咯~",TextColor::Blue);
+        BoardDrawer::CatChat("Let me play randomly...",WHITE,1);
         return (new RandomRobot())->NextStep();
     }
     //endregion
     //region 猜测对手
     if(found)
-       InfoBoard::CatSays("你的走位尽在我的计算之中... ("+ to_string(predictCount)+" times)",TextColor::Blue);
+        BoardDrawer::CatChat("I‘ve calculated "+to_string(predictCount)+" steps of yours!");
     for(const auto &item:list)
         for(const auto& p:item.ava)
             AvaPointsOfOpponent.push_back(p);
     //endregion
+
     if(this->EnableTreeSearch&&StepHistory.size()>=this->SkipStepCount*2) {
         //region 搜索博弈树，预算分数
+        BoardDrawer::CatChat("Thinking.....????",WHITE,30,9);
         auto tree=new ChessTree();
         //装配估值器
         if(this->Evaluator==EvaluatorType::Counting)
@@ -65,6 +68,7 @@ Point ChessTreeRobot::NextStep() {
         tree->GenerateTree(this->TreeDepth, this->PlayerColor);
         auto result = tree->AlphaBetaSearch();
         delete tree;
+        BoardDrawer::StopChatting();
         return result;
         //endregion
     }

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <thread>
 #include <future>
+#include <ctime>
 
 //region 游戏数据
 bool ended;
@@ -15,6 +16,31 @@ int WinCount_Black=0,WinCount_White=0;
 //endregion
 
 //region UI绘制
+time_t LastChatTime=0;
+string ChatText;
+Color ChatColor;
+int ChatDuration=0;
+int AnimateLength=0;
+void BoardDrawer::CatChat(string text,Color color,int duration,int animateLength){
+    LastChatTime=time(nullptr);
+    ChatColor=color;
+    ChatText="GoBangCat: "+text;
+    ChatDuration=duration;
+    AnimateLength=animateLength;
+}
+void BoardDrawer::StopChatting(){
+    ChatDuration=0;
+}
+void BoardDrawer::AnimateChat(Texture icon){
+    if(ChatDuration==0)return;
+    if(time(nullptr)-LastChatTime>ChatDuration){
+        ChatDuration=0;
+        return;
+    }
+    DrawTexture(icon,20,Board_Size+77,WHITE);
+    string str=ChatText.substr(0,ChatText.length()-AnimateLength+1+(time(nullptr)-LastChatTime)%AnimateLength);
+    DrawText(str.c_str(),50,Board_Size+75,28,ChatColor);
+}
 
 void BoardDrawer::HighlightLastPoint() {
     if(StepHistory.empty())return;
@@ -40,10 +66,9 @@ void BoardDrawer::DrawPieces(){
     for(int x=0;x<15;x++){
         for(int y=0;y<15;y++){
             if(MapData[x][y] == PieceStatus::Black){
-                DrawCircle(20+x*GridSize,20+y*GridSize,PieceSize,BLACK);
-            }
-            if(MapData[x][y]==PieceStatus::White){
-                DrawCircle(20+x*GridSize,20+y*GridSize,PieceSize,WHITE);
+                DrawCircle(Margin+x*GridSize,Margin+y*GridSize,PieceSize,BLACK);
+            }else if(MapData[x][y]==PieceStatus::White){
+                DrawCircle(Margin+x*GridSize,Margin+y*GridSize,PieceSize,WHITE);
             }
         }
     }
@@ -60,7 +85,7 @@ void BoardDrawer::GetWinCount(int& black,int& white){
     white=WinCount_White;
 }
 
-PieceStatus  BoardDrawer::IfWined(bool& drew){
+PieceStatus  BoardDrawer::IfWon(bool& drew){
     //TODO:可以从最后一步开始判断，效率更高
 
     Color LineColor=BLUE;
@@ -104,7 +129,6 @@ PieceStatus  BoardDrawer::IfWined(bool& drew){
         }
     }
     if(IfWin!=PieceStatus::None){
-        ended=true;
         DrawLineEx(p_start, p_end, LineThick+2, LineColor);
         if(!ended) {
             if (IfWin == PieceStatus::Black) {
@@ -113,6 +137,7 @@ PieceStatus  BoardDrawer::IfWined(bool& drew){
                 WinCount_White++;
             }
         }
+        ended=true;
         return IfWin;
     }else{
         if(pieceCount==225){
@@ -123,6 +148,7 @@ PieceStatus  BoardDrawer::IfWined(bool& drew){
     return PieceStatus::None;
 }
 //endregion
+
 //region 游戏控制
 void BoardDrawer::ResetStep(){
     while(!StepHistory.empty())
@@ -154,7 +180,7 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     //绘制当前玩家：
     string current= "CurrentPlayer: ";
     current.append(CurrentPlayer==PieceStatus::Black?"Black":"White");
-    DrawText(current.c_str(),20,Board_Size+40,25,BLACK);
+    DrawText(current.c_str(),20,Board_Size+40,24,BLACK);
     auto list =CheckModel?ModelChecker::CheckModel(MapData):vector<ChessModel>();
     //应该轮到谁下棋
     IPlayer*player=Players[0]->PlayerColor==CurrentPlayer?Players[0]:Players[1];

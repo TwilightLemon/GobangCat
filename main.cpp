@@ -22,7 +22,7 @@ IPlayer* Players[2];
 
 int main(){
     system("chcp 65001");
-    InitWindow(Board_Size+60,Board_Size+90,"GobangCat");
+    InitWindow(Board_Size+60,Board_Size+120,"GobangCat");
     SetTargetFPS(15);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
 
@@ -42,7 +42,6 @@ int main(){
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
             ->SetTreeDepth(6);
-
     while(!WindowShouldClose()){
         BeginDrawing();
         //region 基础绘制部分：棋盘背景、棋子
@@ -53,6 +52,8 @@ int main(){
         BoardDrawer::HighlightLastPoint();
         //绘制棋子：
         BoardDrawer::DrawPieces();
+        //绘制ChatUI
+        BoardDrawer::AnimateChat(texture_White);
         //endregion
 
         //region 如果无人胜出则进行一轮博弈
@@ -61,14 +62,21 @@ int main(){
 
         //region 判断有无胜出
         bool drew=false;//是否和棋
-        auto winner=BoardDrawer::IfWined(drew);
+        auto winner= BoardDrawer::IfWon(drew);
         if(winner!=PieceStatus::None || drew){
+            //获胜情况
             string win=drew?"No one":(winner==PieceStatus::Black?"Black":"White");
-            win.append(" Wined in "+to_string(BoardDrawer::GetSteps())+" steps!");
-
+            win.append(" won in "+to_string(BoardDrawer::GetSteps())+" steps!");
             DrawRectangle(0,Board_Size/2-10,Board_Size+60,90,BLUE);
             DrawText(win.c_str(),20,Board_Size/2+10,30,WHITE);
             DrawText("Press Enter to Restart",20,Board_Size/2+45,20,WHITE);
+            //对局情况
+            int WinCount_Black=0,WinCount_White=0;
+            BoardDrawer::GetWinCount(WinCount_Black,WinCount_White);
+            string black="Black: "+to_string(WinCount_Black)+" times";
+            string white="White: "+to_string(WinCount_White)+" times";
+            DrawText(black.c_str(),Board_Size-120,Board_Size/2+10,22,WHITE);
+            DrawText(white.c_str(),Board_Size-120,Board_Size/2+42,22,WHITE);
 
             if(IsKeyPressed(KEY_ENTER)){
                 BoardDrawer::Restart();
@@ -78,7 +86,7 @@ int main(){
 
         //region 悔棋
         if(IsKeyPressed(KEY_UP)){
-            InfoBoard::CatSays("打不过就悔棋是吧- -",TextColor::Red);
+            BoardDrawer::CatChat("How dare u to regret?!",RED);
             BoardDrawer::RegretAStep(2);
         }
         //endregion

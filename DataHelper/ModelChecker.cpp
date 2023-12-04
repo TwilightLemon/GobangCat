@@ -18,7 +18,8 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
         int cot=0;
         for (const auto &p: item.ava) {
             cot++;
-            int max=(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;
+            //限制单个模型的可走点数
+            int max=3;/*(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;*/
             if(cot>max)break;
             //如果该点已经存在，则不重复添加
             bool found = false;
@@ -31,6 +32,7 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
             avaPoints.push_back(p);
             count++;
         }
+        //限制一次最多添加的点数
         if(count>=6)break;
     }
     return avaPoints;
@@ -49,15 +51,15 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
             case ModelType::H4:
                 score+=1000000*p;
                 break;
-            case ModelType::Cube4:
+/*            case ModelType::Cube4:
                 score+=100000*p;
-                break;
+                break;*/
             case ModelType::C4:
                 score+=10000*p;
                 break;
-            case ModelType::Cube3:
+/*            case ModelType::Cube3:
                 score+=1500*p;
-                break;
+                break;*/
             case ModelType::H3:
                 score+=1000*p;
                 break;
@@ -234,7 +236,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     };
     auto CheckM3=[&](vector<Point>& plist){
         //匹配眠三
-        vector<vector<int>> ruleM3={{-2,3,1,1,1,-1},
+        vector<vector<int>> ruleM3={{0,3,1,1,1,-1},
                                     {0,1,0,1,1,-1},
                                     {3,1,1,0,1,-1},
                                     {1,0,0,1,1,2},
@@ -244,7 +246,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     };
     auto CheckH2=[&](vector<Point>& plist){
         //匹配活二
-        vector<vector<int>> ruleH2={{0,3,1,1,3,-2},
+        vector<vector<int>> ruleH2={{0,3,1,1,3,0},
                                     {0,1,0,1,0,2},
                                     {1,0,0,1,2,2}};
         Check(plist,ModelType::H2,ruleH2);
@@ -252,8 +254,8 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     auto CheckM2=[&](vector<Point>& plist){
         //匹配眠二
         vector<vector<int>> ruleM2={
-                                    {-2,0,3,1,1,-1},
-                                    {-2,0,1,3,1,-2},
+                                    {0,0,3,1,1,-1},
+                                    {0,0,1,3,1,0},
                                     {0,1,0,0,1,-1},
                                     {1,0,0,0,1,2}};
         Check(plist,ModelType::M2,ruleM2);
