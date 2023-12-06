@@ -18,8 +18,9 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
         int cot=0;
         for (const auto &p: item.ava) {
             cot++;
+            //P.S. 在GetAvaPoints中限制单个模型点数不影响Cube模型的生成
             //限制单个模型的可走点数
-            int max=3;/*(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;*/
+            int max=(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;
             if(cot>max)break;
             //如果该点已经存在，则不重复添加
             bool found = false;
@@ -51,6 +52,7 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
             case ModelType::H4:
                 score+=1000000*p;
                 break;
+                //不应该为Cube模型计分，因为Cube模型是由其它模型组成的，分数已经计算过了
 /*            case ModelType::Cube4:
                 score+=100000*p;
                 break;*/
@@ -76,7 +78,6 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
                 break;
         }
     }
-   // score+=CountingEvaluator::Evaluate(player,map);
     return score;
 }
 
@@ -137,6 +138,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         //-2表示空但不为ava
         // 2表示不匹配任何子
         // 3表示优先落子
+
         //相等子是谁的
         PieceStatus owner=PieceStatus::None;
         auto detect=[&]()->bool {

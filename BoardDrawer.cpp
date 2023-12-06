@@ -37,8 +37,9 @@ void BoardDrawer::AnimateChat(Texture icon){
         ChatDuration=0;
         return;
     }
+    DrawRectangle(0,Board_Size+60,Board_Size+60,60,BLUE);
     DrawTexture(icon,20,Board_Size+77,WHITE);
-    string str=ChatText.substr(0,ChatText.length()-AnimateLength+1+(time(nullptr)-LastChatTime)%AnimateLength);
+    string str=AnimateLength!=0?ChatText.substr(0,ChatText.length()-AnimateLength+1+(time(nullptr)-LastChatTime)%AnimateLength):ChatText;
     DrawText(str.c_str(),50,Board_Size+75,28,ChatColor);
 }
 
@@ -180,7 +181,7 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     //绘制当前玩家：
     string current= "CurrentPlayer: ";
     current.append(CurrentPlayer==PieceStatus::Black?"Black":"White");
-    DrawText(current.c_str(),20,Board_Size+40,24,BLACK);
+    DrawText(current.c_str(),20,Board_Size+35,24,BLACK);
     auto list =CheckModel?ModelChecker::CheckModel(MapData):vector<ChessModel>();
     //应该轮到谁下棋
     IPlayer*player=Players[0]->PlayerColor==CurrentPlayer?Players[0]:Players[1];

@@ -4,13 +4,16 @@
 #include "BoardDrawer.h"
 #include "InfoBoard.h"
 
+//region UI常量
 //defined at BoardDrawer.h
 const float Board_Size=840;
 const float Margin =20.0f;
 const int LineThick=2;
 const int PieceSize =20;
 const int GridSize =  60;
+//endregion
 
+//region 游戏数据->全局变量
 //defined at DataType.h
 ChessMap MapData=new PieceStatus[15][15]{PieceStatus::None};
 //记录每一步的历史
@@ -19,6 +22,7 @@ stack<Point> StepHistory;
 PieceStatus CurrentPlayer=PieceStatus::Black;
 //玩家列表
 IPlayer* Players[2];
+//endregion
 
 int main(){
     system("chcp 65001");
@@ -42,6 +46,7 @@ int main(){
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
             ->SetTreeDepth(6);
+
     while(!WindowShouldClose()){
         BeginDrawing();
         //region 基础绘制部分：棋盘背景、棋子
@@ -86,7 +91,7 @@ int main(){
 
         //region 悔棋
         if(IsKeyPressed(KEY_UP)){
-            BoardDrawer::CatChat("How dare u to regret?!",RED);
+            BoardDrawer::CatChat("How dare u to regret?!",RED,2,0);
             BoardDrawer::RegretAStep(2);
         }
         //endregion

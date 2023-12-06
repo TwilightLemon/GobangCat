@@ -25,7 +25,7 @@ public:
 
 class ChessTree{
 public:
-    //根据现有局面展开树
+    //根据现有局面生成树root并展开第一层
     void GenerateTree(int depth,PieceStatus player);
     //搜索最佳落子点
     [[nodiscard]] Point AlphaBetaSearch();

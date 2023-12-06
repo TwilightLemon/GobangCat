@@ -1,6 +1,6 @@
 //
 // Created by cz241 on 11/22/2023.
-//通过计数的方式估分
+//通过计数的方式估分 可选但是弃用的方法，未来可保留作为低难度选择
 //
 
 #include "CountingEvaluator.h"
