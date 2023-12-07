@@ -47,7 +47,7 @@ Point ChessTreeRobot::NextStep() {
     //endregion
     //region 猜测对手
     if(found)
-        BoardDrawer::CatChat("I‘ve calculated "+to_string(predictCount)+" steps of yours!");
+        BoardDrawer::CatChat("I‘ve calculated "+to_string(predictCount)+" steps of yours!",WHITE,3,0);
     for(const auto &item:list)
         for(const auto& p:item.ava)
             AvaPointsOfOpponent.push_back(p);
@@ -68,6 +68,7 @@ Point ChessTreeRobot::NextStep() {
         tree->GenerateTree(this->TreeDepth, this->PlayerColor);
         auto result = tree->AlphaBetaSearch();
         delete tree;
+
         BoardDrawer::StopChatting();
         return result;
         //endregion

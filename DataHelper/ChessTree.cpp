@@ -163,7 +163,6 @@ Point ChessTree::AlphaBetaSearch(){
                 //可以不考虑胜利节点，因为可走点由生成器提供
                 //胜利时可走点生成器不会提供下一步点
 
-
                 //更新父节点的alpha或beta
                 if (parent->whose == this->BenefitPlayer) {//Min层
                     //更新父节点的beta

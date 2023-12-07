@@ -15,8 +15,15 @@ extern const int LineThick;
 extern const int PieceSize;
 extern const int GridSize;
 //endregion
-
+//玩家列表
 extern IPlayer* Players[2];
+
+struct ChatData{
+    string ChatText;
+    Color ChatColor;
+    int ChatDuration=0;
+    int AnimateLength=0;
+};
 
 //负责绘制棋盘和棋子
 class BoardDrawer {

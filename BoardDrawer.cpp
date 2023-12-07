@@ -9,6 +9,7 @@
 #include <thread>
 #include <future>
 #include <ctime>
+#include <queue>
 
 //region 游戏数据
 bool ended;
@@ -16,31 +17,29 @@ int WinCount_Black=0,WinCount_White=0;
 //endregion
 
 //region UI绘制
+
 time_t LastChatTime=0;
-string ChatText;
-Color ChatColor;
-int ChatDuration=0;
-int AnimateLength=0;
+queue<ChatData> ChatHistory;
+
 void BoardDrawer::CatChat(string text,Color color,int duration,int animateLength){
     LastChatTime=time(nullptr);
-    ChatColor=color;
-    ChatText="GoBangCat: "+text;
-    ChatDuration=duration;
-    AnimateLength=animateLength;
+    ChatHistory.push({text,color,duration,animateLength});
 }
 void BoardDrawer::StopChatting(){
-    ChatDuration=0;
+    while(!ChatHistory.empty())
+        ChatHistory.pop();
 }
 void BoardDrawer::AnimateChat(Texture icon){
-    if(ChatDuration==0)return;
-    if(time(nullptr)-LastChatTime>ChatDuration){
-        ChatDuration=0;
+    if(ChatHistory.empty())return;
+    ChatData data=ChatHistory.front();
+    if(time(nullptr)-LastChatTime>data.ChatDuration){
+        ChatHistory.pop();
         return;
     }
     DrawRectangle(0,Board_Size+60,Board_Size+60,60,BLUE);
     DrawTexture(icon,20,Board_Size+77,WHITE);
-    string str=AnimateLength!=0?ChatText.substr(0,ChatText.length()-AnimateLength+1+(time(nullptr)-LastChatTime)%AnimateLength):ChatText;
-    DrawText(str.c_str(),50,Board_Size+75,28,ChatColor);
+    string str=data.AnimateLength!=0?data.ChatText.substr(0,data.ChatText.length()-data.AnimateLength+1+(time(nullptr)-LastChatTime)%data.AnimateLength):data.ChatText;
+    DrawText(str.c_str(),90,Board_Size+78,28,data.ChatColor);
 }
 
 void BoardDrawer::HighlightLastPoint() {
@@ -169,7 +168,7 @@ void BoardDrawer::RegretAStep(int stepCount){
     int count=0;
     if(AsyncStepResult.valid()) {
         stepCount = 1;
-        AsyncStepResult.wait_for(std::chrono::milliseconds(1));
+        StopChatting();
     }
     for(int i=0;i<stepCount;i++)
     if(!StepHistory.empty()){
