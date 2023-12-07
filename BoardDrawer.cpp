@@ -164,8 +164,13 @@ void BoardDrawer::Restart() {
     CurrentPlayer=PieceStatus::Black;
     ended=false;
 }
+static std::future<Point> AsyncStepResult;
 void BoardDrawer::RegretAStep(int stepCount){
     int count=0;
+    if(AsyncStepResult.valid()) {
+        stepCount = 1;
+        AsyncStepResult.wait_for(std::chrono::milliseconds(1));
+    }
     for(int i=0;i<stepCount;i++)
     if(!StepHistory.empty()){
         auto p1=StepHistory.top();
@@ -188,14 +193,13 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     Point p={-1,-1};
 
     //异步获取下一步
-    static std::future<Point> result;
     if(player->EnableAsync){
-        if(result.valid()){
-            if(result.wait_for(std::chrono::seconds(0))==std::future_status::ready){
-                p=result.get();
+        if(AsyncStepResult.valid()){
+            if(AsyncStepResult.wait_for(std::chrono::seconds(0)) == std::future_status::ready){
+                p=AsyncStepResult.get();
             }
         }else {
-            result = std::async(std::launch::async, &IPlayer::NextStep, player);
+            AsyncStepResult = std::async(std::launch::async, &IPlayer::NextStep, player);
         }
     }else{
         p=player->NextStep();

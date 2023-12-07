@@ -72,7 +72,6 @@ Point ChessTree::AlphaBetaSearch(){
         if(parent->alpha>=parent->beta){
             parent->NextAvaPoints.clear();
         }
-
         //搜索完成
        if(parent->NextAvaPoints.empty()&&parent->depth==0) {
                 //查找root->children中最大的score
@@ -122,6 +121,7 @@ Point ChessTree::AlphaBetaSearch(){
                     parent = parent->parent;
                     parent->children.erase(parent->children.end() - 1);
                     parent->NextAvaPoints.insert(parent->NextAvaPoints.begin(), p);
+                    i--;
                     break;
                 }
                 auto node = new ChessNode();
@@ -156,6 +156,9 @@ Point ChessTree::AlphaBetaSearch(){
                 newMap[p.x][p.y] = node->whose;
                 //计算该节点分数
                 int score = this->Evaluator(this->BenefitPlayer, newMap);
+                if(node->depth==1){
+                    node->alpha=score;
+                }
                 count++;
                 //可以不考虑胜利节点，因为可走点由生成器提供
                 //胜利时可走点生成器不会提供下一步点
@@ -180,7 +183,7 @@ Point ChessTree::AlphaBetaSearch(){
         }
         //撤销更改并向上一层，同时传递alpha或beta
         newMap[parent->point.x][parent->point.y] = PieceStatus::None;
-       if(parent->parent== nullptr)break;
+       if(parent->parent== nullptr)continue;
         if(parent->parent->whose==this->BenefitPlayer){
             //如果父节点是Min层，则传递beta=min{自己的beta,子节点的alpha,子节点的beta}
             parent->parent->beta=min(parent->parent->beta,min(parent->alpha,parent->beta));
