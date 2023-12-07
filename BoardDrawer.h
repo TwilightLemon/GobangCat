@@ -19,6 +19,7 @@ extern const int GridSize;
 extern IPlayer* Players[2];
 
 struct ChatData{
+    time_t LastChatTime=0;
     string ChatText;
     Color ChatColor;
     int ChatDuration=0;

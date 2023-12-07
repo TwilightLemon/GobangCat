@@ -53,6 +53,13 @@ int main(){
         ClearBackground(SKYBLUE);
         //绘制棋盘背景：
         BoardDrawer::DrawBackground();
+        //初始时绘制游戏提示框：
+        static bool first=true;
+        if(StepHistory.empty()&&first){
+            first=false;
+            BoardDrawer::CatChat("Tips: Press UP to regret and Enter to restart.",WHITE,3,0);
+            BoardDrawer::CatChat("Good Luck!",WHITE,2,0);
+        }
         //显示上一步
         BoardDrawer::HighlightLastPoint();
         //绘制棋子：

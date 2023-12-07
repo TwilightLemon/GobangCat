@@ -18,27 +18,27 @@ int WinCount_Black=0,WinCount_White=0;
 
 //region UI绘制
 
-time_t LastChatTime=0;
-queue<ChatData> ChatHistory;
-
+vector<ChatData> ChatHistory;
 void BoardDrawer::CatChat(string text,Color color,int duration,int animateLength){
-    LastChatTime=time(nullptr);
-    ChatHistory.push({text,color,duration,animateLength});
+    ChatHistory.push_back({0,text,color,duration,animateLength});
 }
 void BoardDrawer::StopChatting(){
-    while(!ChatHistory.empty())
-        ChatHistory.pop();
+    ChatHistory.clear();
 }
 void BoardDrawer::AnimateChat(Texture icon){
     if(ChatHistory.empty())return;
-    ChatData data=ChatHistory.front();
-    if(time(nullptr)-LastChatTime>data.ChatDuration){
-        ChatHistory.pop();
-        return;
-    }
     DrawRectangle(0,Board_Size+60,Board_Size+60,60,BLUE);
     DrawTexture(icon,20,Board_Size+77,WHITE);
-    string str=data.AnimateLength!=0?data.ChatText.substr(0,data.ChatText.length()-data.AnimateLength+1+(time(nullptr)-LastChatTime)%data.AnimateLength):data.ChatText;
+    auto data=ChatHistory[0];
+    if(data.LastChatTime==0) {
+        data.LastChatTime = time(nullptr);
+        ChatHistory[0]=data;
+    }
+    if(time(nullptr)-data.LastChatTime>data.ChatDuration){
+        ChatHistory.erase(ChatHistory.begin());
+        return;
+    }
+    string str=data.AnimateLength!=0?data.ChatText.substr(0,data.ChatText.length()-data.AnimateLength+1+(time(nullptr)-data.LastChatTime)%data.AnimateLength):data.ChatText;
     DrawText(str.c_str(),90,Board_Size+78,28,data.ChatColor);
 }
 
