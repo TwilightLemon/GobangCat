@@ -55,7 +55,7 @@ Point ChessTree::AlphaBetaSearch(){
     }
     Point firstPoint=root->NextAvaPoints[0];
     for(const auto& point:root->NextAvaPoints){
-        InfoBoard::CatSays("尝试走点: "+to_string(point.x)+" "+to_string(point.y));
+        InfoBoard::CatSays("可走点: "+to_string(point.x)+" "+to_string(point.y));
     }
     //拷贝一份map
     auto parent=this->root;
@@ -69,6 +69,7 @@ Point ChessTree::AlphaBetaSearch(){
     const int depth=this->maxDepth;
     int count=0;
     while(true) {
+        //接受回溯过程中的剪枝
         if(parent->alpha>=parent->beta){
             parent->NextAvaPoints.clear();
         }
@@ -109,7 +110,6 @@ Point ChessTree::AlphaBetaSearch(){
                 }
                 break;
             }
-
        if(!parent->NextAvaPoints.empty()) {
             //从parent节点开始，一直生成到第depth-1层
             int i;
@@ -142,9 +142,9 @@ Point ChessTree::AlphaBetaSearch(){
                 parent->children.push_back(node);
                 parent = node;
             }
+           //此时parent为最底层非叶子节点
+           //生成叶子节点，parent为叶子节点的父节点
             while (!parent->NextAvaPoints.empty()) {
-                //此时parent为最底层非叶子节点
-                //生成叶子节点，parent为叶子节点的父节点
                 Point p = parent->NextAvaPoints[0];
                 parent->NextAvaPoints.erase(parent->NextAvaPoints.begin());
                 auto node = new ChessNode();
@@ -160,9 +160,9 @@ Point ChessTree::AlphaBetaSearch(){
                     node->alpha=score;
                 }
                 count++;
+
                 //可以不考虑胜利节点，因为可走点由生成器提供
                 //胜利时可走点生成器不会提供下一步点
-
                 //更新父节点的alpha或beta
                 if (parent->whose == this->BenefitPlayer) {//Min层
                     //更新父节点的beta

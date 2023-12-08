@@ -26,9 +26,10 @@ struct ChatData{
     int AnimateLength=0;
 };
 
-//负责绘制棋盘和棋子
+//负责UI绘制和游戏操作
 class BoardDrawer {
 private:
+    //交换玩家
     static void ExchangePlayer();
 public:
     //region 绘制UI

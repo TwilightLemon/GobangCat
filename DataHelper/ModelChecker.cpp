@@ -9,6 +9,7 @@
 #include "CountingEvaluator.h"
 
 
+//可走点生成器
 vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
     auto list = ModelChecker::CheckModel(map);
     vector<Point> avaPoints;
@@ -38,7 +39,6 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
     }
     return avaPoints;
 }
-
 //评估局面分数
 int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
     auto mlist=CheckModel(map);
@@ -80,7 +80,7 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
     }
     return score;
 }
-
+//对模型进行价值排序
 void ShellSort(vector<ChessModel>& list) {
     ChessModel win;
     bool foundWin=false;
@@ -109,7 +109,6 @@ void ShellSort(vector<ChessModel>& list) {
             count++;
         }
 }
-
 //检索双方符合的模型，预判可能的步骤
 vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     vector<ChessModel> result;
@@ -354,6 +353,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                 bool found = false;
                 ChessModel_Single foundModel;
                 for (const auto &item: Checked) {
+                    //平行的重复点不是Cube模型
                     int vec_x = item.ava.x - item.point.x, vec_y = item.ava.y - item.point.y;
                     int inc_x = p.x - model.points[0].x, inc_y = p.y - model.points[0].y;
                     if (item.whose == model.whose && item.ava.Equal(p) && (vec_x * inc_y != vec_y * inc_x)) {
@@ -392,6 +392,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     ShellSort(result);
     return result;
 }
+
 string ChessModel::GetModelName(ModelType type){
     switch (type){
         case ModelType::M2:

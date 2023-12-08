@@ -191,8 +191,8 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     IPlayer*player=Players[0]->PlayerColor==CurrentPlayer?Players[0]:Players[1];
     Point p={-1,-1};
 
-    //异步获取下一步
     if(player->EnableAsync){
+        //异步获取下一步
         if(AsyncStepResult.valid()){
             if(AsyncStepResult.wait_for(std::chrono::seconds(0)) == std::future_status::ready){
                 p=AsyncStepResult.get();

@@ -70,52 +70,40 @@ graph TD;
 ```
 #### 如何走？
 ```mermaid
-graph TD;
+graph LR;
     GenerateTree-->root[root];
     root-->g(AvaPointGenerator)-->下一步可走点集-->在newMap中模拟落子-->if{是否达到最大深度\n或不可再走}-->|是|eva(Evaluator)-->评估值
     if-->|否|g
 ```
-#### 博弈树结构
+#### 博弈树结构——动态而不确定
+整棵树结构如下：
 ```mermaid
 graph TD
     A[Root] --> B1[Min]
     A --> B2[Min]
     B1 --> C1[Max]
-    B1 --> C2[Max]
-    B2 --> C3[Max]
-    B2 --> C4[Max]
+    B1 --> C2[没有可走点]
+    B2 --> C3[Black胜出]
+    B2 -..-> C4[Max]
     C1 --> D1[Min]
     C1 --> D2[Min]
-    C2 --> D3[Min]
-    C2 --> D4[Min]
-    C3 --> D5[Min]
-    C3 --> D6[Min]
-    C4 --> D7[Min]
-    C4 --> D8[Min]
+    C2 -..-> D3[Min]
+    C2 -..-> D4[Min]
+    C4 -..-> D7[Min]
+    C4 -..-> D8[Min]
     D1 --> E1[Max]
     D1 --> E2[Max]
     D2 --> E3[Max]
     D2 --> E4[Max]
-    D3 --> E5[Max]
-    D3 --> E6[Max]
-    D4 --> E7[Max]
-    D4 --> E8[Max]
-    D5 --> E9[Max]
-    D5 --> E10[Max]
-    D6 --> E11[Max]
-    D6 --> E12[Max]
-    D7 --> E13[Max]
-    D7 --> E14[Max]
-    D8 --> E15[Max]
-    D8 --> E16[Max]
+    D3 -..-> E5[Max]
+    D3 -..-> E6[Max]
+    D4 -..-> E7[Max]
+    D7 -..-> E13[Max]
+    D7 -..-> E14[Max]
+    D8 -..-> E15[Max]
+    D8 -..-> E16[Max]
 ```
-###### 搜索规则：
-- 1.root由对手下子得到，则下一层为我方，选择最有利我方的节点，故root为Max节点  
-- 2.上一层为我方下，则本层由对手下，选择对我方最不利节点，故为Min节点，依此类推
-- 3.每生成下一个子节点，传递alpha和beta值，用于剪枝
-- 4.直到达到最大深度或无子可下，由Evaluator评估后更新alpha或beta值
-- 5.回溯更新：对于Max节点，alpha=max{本节点alpha,child.alpha,child.beta}；对于Min节点，beta=min{本节点beta,child.alpha,child.beta}
-- 6.剪枝条件：alpha>=beta，不再生成子节点
+节点结构如下：
 ```mermaid
 graph LR;
     node[ChessNode]-.成员.->map[map]
@@ -128,6 +116,45 @@ graph LR;
     node-.成员.->parent[parent]
     node-.成员.->children[children]
 ```
+
+##### 动态生成和遍历树——根->枝->叶
+```mermaid
+graph 
+    A[开始] --> B[生成根节点]
+    B --> C{检查root节点的可走点数量}
+    C -->|只有一个可走点| D[返回该点]
+    C -->|有多个可走点| E[对每一个可走点进行搜索]
+    E --> F[拷贝一份map]
+    F --> G[进入循环]
+    G --> H{检查剪枝条件}
+    H -->|满足剪枝条件| I[清空可走点]
+    H -->|不满足剪枝条件| J{检查可走点和深度}
+    J -->|可走点为空且深度为0| K[查找最大的score并返回对应的点]
+    J -->|可走点不为空| L[生成到第depth-1层]
+    L --> M{检查parent节点的可走点}
+    M -->|没有可走的点| N[撤销更改,返回上一层,重入AvaPoint]
+    M -->|有可走的点| O[生成叶子节点,计算该节点分数,更新父节点的alpha或beta]
+    O --> P{检查是否发生剪枝}
+    P -->|发生剪枝| Q[不再生成parent的其它子节点]
+    P -->|未发生剪枝| R[撤销更改并向上一层,同时传递alpha或beta]
+    R --> G
+    Q --> G
+    N --> G
+    K --> Z[结束]
+    D --> Z
+```
+
+##### α-β搜索规则：
+- 1.root由对手下子得到，则下一层为我方，选择最有利我方的节点，故root为Max节点  
+- 2.上一层为我方下，则本层由对手下，选择对我方最不利节点，故为Min节点，依此类推
+- 3.每生成下一个子节点，传递alpha和beta值，用于剪枝
+- 4.直到达到最大深度或无子可下，由Evaluator评估后更新alpha或beta值
+- 5.回溯更新：对于Max节点，alpha=max{本节点alpha,child.alpha,child.beta}；对于Min节点，beta=min{本节点beta,child.alpha,child.beta}
+- 6.剪枝条件：alpha>=beta，不再生成子节点
+
+###### 具体在算法中有两处响应剪枝:
+- 生成叶节点时触发
+- 回溯更新时触发
 
 ## 优化
 ### 1.棋盘数据和树的构建

@@ -39,8 +39,6 @@ int main(){
     //加载玩家：
     Players[0] = (new HumanPlayer())
             ->SetPlayer(PieceStatus::Black);
-/*    Players[1] = (new HumanPlayer())
-            ->SetPlayer(PieceStatus::White);*/
     Players[1] = (new ChessTreeRobot())
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
