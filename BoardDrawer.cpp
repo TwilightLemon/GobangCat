@@ -186,7 +186,8 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     string current= "CurrentPlayer: ";
     current.append(CurrentPlayer==PieceStatus::Black?"Black":"White");
     DrawText(current.c_str(),20,Board_Size+35,24,BLACK);
-    auto list =CheckModel?ModelChecker::CheckModel(MapData):vector<ChessModel>();
+    vector<ChessModel> list;
+    if(!StepHistory.empty())list =CheckModel?ModelChecker::CheckModel(MapData):vector<ChessModel>();
     //应该轮到谁下棋
     IPlayer*player=Players[0]->PlayerColor==CurrentPlayer?Players[0]:Players[1];
     Point p={-1,-1};

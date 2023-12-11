@@ -43,7 +43,7 @@ int main(){
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetTreeDepth(6);
+            ->SetTreeDepth(7);
 
     while(!WindowShouldClose()){
         BeginDrawing();

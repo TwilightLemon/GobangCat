@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "DataType.h"
+#include <chrono>
 
 enum ModelType{
     //10种模型
@@ -35,6 +36,7 @@ public:
 
 class ModelChecker {
 public:
+    static long long CheckerTime;
     static int Evaluate(PieceStatus player,const ChessMap& map);
     static vector<Point> GetAvaPoints(const ChessMap& map);
     static vector<ChessModel> CheckModel(const ChessMap& map);

@@ -5,6 +5,7 @@
 #include <iostream>
 #include "ChessTree.h"
 #include "../InfoBoard.h"
+#include "ModelChecker.h"
 #include <chrono>
 using namespace std::chrono;
 
@@ -46,6 +47,7 @@ void ShowMap(const ChessMap& map,int depth,int alpha,int beta,Point lastp){
 
 Point ChessTree::AlphaBetaSearch(){
     InfoBoard::CatSays("开始搜索博弈树...");
+    ModelChecker::CheckerTime=0;
     auto begin=high_resolution_clock::now();
     ChessNode* result= nullptr;
     if(this->root->NextAvaPoints.size()==1){
@@ -198,5 +200,6 @@ Point ChessTree::AlphaBetaSearch(){
     auto end=high_resolution_clock::now();
     InfoBoard::CatSays("已经暴力搜索"+to_string(count)+"个对局了！");
     InfoBoard::CatSays("搜索完成，耗时"+to_string(duration_cast<milliseconds>(end-begin).count())+"ms");
+    InfoBoard::CatSays("ModelChecker耗时"+to_string(ModelChecker::CheckerTime)+"ms  占比:"+to_string(ModelChecker::CheckerTime*100/duration_cast<milliseconds>(end-begin).count())+"%");
     return result== nullptr?firstPoint:result->point;
 }
