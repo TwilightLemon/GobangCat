@@ -11,7 +11,7 @@ public:
     PieceStatus PlayerColor;
     //是否异步执行NextStep
     bool EnableAsync=false;
-    virtual void Break();
+    virtual void Break()=0;
     virtual Point NextStep() = 0;
 };
 

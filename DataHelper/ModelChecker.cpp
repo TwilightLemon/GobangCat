@@ -3,9 +3,7 @@
 //
 #include <iostream>
 #include <algorithm>
-#include <array>
 #include "ModelChecker.h"
-#include "../Player/IPlayer.h"
 #include "CountingEvaluator.h"
 
 //可走点生成器
@@ -112,24 +110,18 @@ long long ModelChecker::CheckerTime=0;
 
 //检索双方符合的模型，预判可能的步骤
 vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
-  //  ShowMap(map,0,0,0,{0,0});
     auto now=chrono::high_resolution_clock ::now();
     vector<ChessModel> result;
     //region 检索模型
-    auto CheckEmpty=[](const array<Point,6>& p,const ChessMap& map)->bool{
+    auto CheckEmpty=[](vector<Point>& p,const ChessMap& map)->bool{
         bool empty=true;
-        int pointCount=6;
-        for(int i=0;i<pointCount;i++){
-            if(!p[i].EmptyInMap(map)){
-                empty= false;
-                break;
-            }
-        }
+        for(const auto& point:p)
+            if(!point.EmptyInMap(map))
+                empty=false;
         return empty;
     };
-    auto Check=[&](const array<Point,6>& p,ModelType type,const vector<vector<int>>& rules){
-        int pointCount=6;
-
+    auto Check=[&](vector<Point>& p,ModelType type,const vector<vector<int>>& rules){
+        int pointCount=rules[0].size();
         ChessModel Model;
         Model.type=type;
         vector<Point> ava,points;
@@ -150,7 +142,6 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
             for (int i = 0; i < rulesCount; i++) {
                 bool match = true;
                 for (int j = 0; j < pointCount; j++) {
-                    if(p[j].x==-1&&p[j].y==-1)continue;
                     if (rules[i][j] == 1) {
                         if (p[j].EmptyInMap(map)) {
                             match = false;
@@ -221,27 +212,27 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         }
 
     };
-    auto CheckWin=[&](array<Point,6>& plist){
+    auto CheckWin=[&](vector<Point>& plist){
         //匹配五子连珠
         vector<vector<int>> ruleWin={{1,1,1,1,1}};
         Check(plist,ModelType::Win,ruleWin);
     };
-    auto CheckH4=[&](array<Point,6>& plist){
+    auto CheckH4=[&](vector<Point>& plist){
         vector<vector<int>> ruleH4={{1,1,1,1,0}};
         Check(plist,ModelType::H4,ruleH4);
     };
-    auto CheckC4=[&](array<Point,6>& plist){
+    auto CheckC4=[&](vector<Point>& plist){
         //匹配冲四
         vector<vector<int>> ruleM4={{1,0,1,1,1},{0,1,1,1,1,-1},{1,1,0,1,1}};
         Check(plist, ModelType::C4, ruleM4);
     };
-    auto CheckH3=[&](array<Point,6>& plist){
+    auto CheckH3=[&](vector<Point>& plist){
         //匹配活三
         vector<vector<int>> ruleH3={{0,1,1,1,0},
                                     {0,1,3,1,1}};
         Check(plist,ModelType::H3,ruleH3);
     };
-    auto CheckM3=[&](array<Point,6>& plist){
+    auto CheckM3=[&](vector<Point>& plist){
         //匹配眠三
         vector<vector<int>> ruleM3={{0,3,1,1,1,-1},
                                     {0,1,0,1,1,-1},
@@ -251,111 +242,109 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                                     {-1,0,1,1,1,0,-1}};
         Check(plist,ModelType::M3,ruleM3);
     };
-    auto CheckH2=[&](array<Point,6>& plist){
+    auto CheckH2=[&](vector<Point>& plist){
         //匹配活二
         vector<vector<int>> ruleH2={{0,3,1,1,3,0},
                                     {0,1,0,1,0,2},
                                     {1,0,0,1,2,2}};
         Check(plist,ModelType::H2,ruleH2);
     };
-    auto CheckM2=[&](array<Point,6>& plist){
+    auto CheckM2=[&](vector<Point>& plist){
         //匹配眠二
         vector<vector<int>> ruleM2={
-                                    {0,0,3,1,1,-1},
-                                    {0,0,1,3,1,0},
-                                    {0,1,0,0,1,-1},
-                                    {1,0,0,0,1,2}};
+                {0,0,3,1,1,-1},
+                {0,0,1,3,1,0},
+                {0,1,0,0,1,-1},
+                {1,0,0,0,1,2}};
         Check(plist,ModelType::M2,ruleM2);
     };
     //endregion
-    array<array<Point,6>,8> region={{-1,-1}};
     for(int x=0;x<15;x++) {
         for (int y = 0; y < 15; y++) {
-            int count=0;
+            vector<vector<Point>> region;
             //region 遍历所有可能的五个点
             if(y<=10) {
                 //取纵向+
-                array<Point,6> q = {{{x,y},{x,y+1},{x,y+2},{x,y+3},{x,y+4},{-1,-1}}};
-                if(y<=9)
-                    q[5]={x,y+5};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x, y + 1},  {x, y + 2}, {x, y + 3},  {x, y + 4}};
+                if(!CheckEmpty(p,map)) {
+                    if (y <= 9)
+                        p.push_back({x, y + 5});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             if(y>=4){
                 //取纵向-
-                array<Point,6> q = {{{x, y}, {x, y - 1},  {x, y - 2}, {x, y - 3},  {x, y - 4},{-1,-1}}};
-                if(y>=5)
-                    q[5]={x,y-5};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x, y - 1},  {x, y - 2}, {x, y - 3},  {x, y - 4}};
+                if(!CheckEmpty(p,map)) {
+                    if (y >= 5)
+                        p.push_back({x, y - 5});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             if(x<=10) {
                 //取横向+
-                array<Point,6> q={{{x,y},{x+1,y},{x+2,y},{x+3,y},{x+4,y},{-1,-1}}};
-                if(x<=9)
-                    q[5]={x+5,y};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x+1, y},  {x+2, y}, {x+3, y},  {x+4, y}};
+                if(!CheckEmpty(p,map)) {
+                    if (x <= 9)
+                        p.push_back({x + 5, y});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             if(x>=4) {
                 //取横向-
-                array<Point,6> q={{{x, y}, {x - 1, y},  {x - 2, y}, {x - 3, y},  {x - 4, y},{-1,-1}}};
-                if(x>=5)
-                    q[5]={x-5,y};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x-1, y},  {x-2, y}, {x-3, y},  {x-4, y}};
+                if(!CheckEmpty(p,map)) {
+                    if (x >= 5)
+                        p.push_back({x - 5, y});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             if(x<=10&&y<=10) {
                 //取左上到右下
-                array<Point,6> q={{{x, y}, {x + 1, y + 1},  {x + 2, y + 2}, {x + 3, y + 3},  {x + 4, y + 4},{-1,-1}}};
-                if(x<=9&&y<=9)
-                    q[5]={x+5,y+5};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x+1, y + 1},  {x+2, y + 2}, {x+3, y + 3},  {x+4, y + 4}};
+                if(!CheckEmpty(p,map)) {
+                    if (x <= 9 && y <= 9)
+                        p.push_back({x + 5, y + 5});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             if(x>=4&&y>=4) {
                 //取左上到右下
-                array<Point,6> q={{{x, y}, {x - 1, y - 1},  {x - 2, y - 2}, {x - 3, y - 3},  {x - 4, y - 4},{-1,-1}}};
-                if(x>=5&&y>=5)
-                    q[5]={x-5,y-5};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x-1, y - 1},  {x-2, y - 2}, {x-3, y - 3},  {x-4, y - 4}};
+                if(!CheckEmpty(p,map)) {
+                    if (x >= 5 && y >= 5)
+                        p.push_back({x - 5, y - 5});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             if(x>=4&&y<=10) {
                 //取右上到左下
-                array<Point,6> q={{{x, y}, {x - 1, y + 1},  {x - 2, y + 2}, {x - 3, y + 3},  {x - 4, y + 4},{-1,-1}}};
-                if(x>=5&&y<=9)
-                    q[5]={x-5,y+5};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x-1, y + 1},  {x-2, y + 2}, {x-3, y + 3},  {x-4, y + 4}};
+                if(!CheckEmpty(p,map)) {
+                    if (x >= 5 && y <= 9)
+                        p.push_back({x - 5, y + 5});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             if(x<=10&&y>=4) {
                 //取右上到左下
-                array<Point,6> q={{{x, y}, {x + 1, y - 1},  {x + 2, y - 2}, {x + 3, y - 3},  {x + 4, y - 4},{-1,-1}}};
-                if(x<=9&&y>=5)
-                    q[5]={x+5,y-5};
-                if(!CheckEmpty(q,map)) {
-                    region[count] = q;
-                    count++;
+                vector<Point> p = { {x, y}, {x+1, y - 1},  {x+2, y - 2}, {x+3, y - 3},  {x+4, y - 4}};
+                if(!CheckEmpty(p,map)) {
+                    if (x <= 9 && y >= 5)
+                        p.push_back({x + 5, y - 5});
+                    else p.push_back({-1, -1});
+                    region.push_back(p);
                 }
             }
             //endregion
-            for (int i =0;i<count;i++) {
-                auto item=region[i];
+            for (auto &item: region) {
                 CheckWin(item);
                 CheckH4(item);
                 CheckC4(item);
@@ -417,6 +406,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     CheckerTime+= chrono::duration_cast<chrono::milliseconds>((chrono::high_resolution_clock::now()-now)).count();
     return result;
 }
+
 
 string ChessModel::GetModelName(ModelType type){
     switch (type){

@@ -45,6 +45,8 @@ int main(){
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
+            //尝试无限可能，走稳下一步棋
+            ->SetMaxCount(INT_MAX,4)
             ->SetTreeDepth(8);
 
     while(!WindowShouldClose()){
