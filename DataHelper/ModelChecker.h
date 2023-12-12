@@ -6,7 +6,7 @@
 #define C2023_CHALLENGE_MODELCHECKER_H
 
 #include <vector>
-#include "DataType.h"
+#include "DataType.hpp"
 #include <chrono>
 
 enum ModelType{
@@ -38,8 +38,9 @@ class ModelChecker {
 public:
     static long long CheckerTime;
     static int Evaluate(PieceStatus player,const ChessMap& map);
-    static vector<Point> GetAvaPoints(const ChessMap& map);
+    static vector<Point> GetAvaPoints(const ChessMap& map,int MaxCount);
     static vector<ChessModel> CheckModel(const ChessMap& map);
+    static vector<ChessModel> PrintMapModel(const ChessMap& map,string ptr="");
 };
 
 #endif //C2023_CHALLENGE_MODELCHECKER_H

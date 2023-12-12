@@ -20,6 +20,12 @@ using namespace std;
 vector<Point> AvaPointsOfOpponent;
 int predictCount=0;
 
+ChessTree* tree;
+void ChessTreeRobot::Break() {
+    tree->Stop=true;
+    InfoBoard::CatSays("Searching is disrupted.");
+}
+
 Point ChessTreeRobot::NextStep() {
     InfoBoard::Clear();
     //region 看一下模型能预判到对手多少点
@@ -38,7 +44,7 @@ Point ChessTreeRobot::NextStep() {
     AvaPointsOfOpponent.clear();
     //endregion
     //检索几个常见的模型
-    auto list= ModelChecker::CheckModel(MapData);
+    auto list= ModelChecker::PrintMapModel(MapData,"SUPPLYiNG");
     //region 没有匹配到模型，随便下
     if(list.empty()){
         BoardDrawer::CatChat("Let me play randomly...",WHITE,1);
@@ -56,7 +62,7 @@ Point ChessTreeRobot::NextStep() {
     if(this->EnableTreeSearch&&StepHistory.size()>=this->SkipStepCount*2) {
         //region 搜索博弈树，预算分数
         BoardDrawer::CatChat("Thinking.....????",WHITE,30,9);
-        auto tree=new ChessTree();
+        tree=new ChessTree();
         //装配估值器
         if(this->Evaluator==EvaluatorType::Counting)
             //使用计数估值器
@@ -65,6 +71,9 @@ Point ChessTreeRobot::NextStep() {
         else tree->Evaluator=ModelChecker::Evaluate;
         //装配可走点生成器
         tree->AvaPointGenerator=ModelChecker::GetAvaPoints;
+        //设置模拟走子MaxCount
+        tree->MaxCount=MaxCount;
+        tree->MaxRootCount=MaxRootCount;
         tree->GenerateTree(this->TreeDepth, this->PlayerColor);
         auto result = tree->AlphaBetaSearch();
         delete tree;

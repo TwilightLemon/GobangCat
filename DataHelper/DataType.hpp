@@ -7,6 +7,7 @@
 
 #include <string>
 #include <stack>
+#include <iostream>
 using namespace std;
 
 enum class PieceStatus {
@@ -45,5 +46,25 @@ struct Point{
     }
 };
 extern stack<Point> StepHistory;
-
+static void ShowMap(const ChessMap& map,int depth,int alpha,int beta,Point lastp){
+    cout<<"Depth: "<<depth<< "  "<<"LastPoint: "<<lastp.x<<","<<lastp.y<<endl;
+    cout<<"Alpha: "<<alpha<<" Beta: "<<beta<<endl;
+    int count=0;
+    for(int x=0;x<15;x++){
+        for(int y=0;y<15;y++){
+            if(map[y][x]==PieceStatus::None)
+                cout<<"- ";
+            else if(map[y][x]==PieceStatus::Black) {
+                cout << "B ";
+                count++;
+            }
+            else {
+                cout << "W ";
+                count++;
+            }
+        }
+        cout<<endl;
+    }
+    cout<<"Piece Count: "<<count<<endl;
+}
 #endif //C2023_CHALLENGE_DATATYPE_H

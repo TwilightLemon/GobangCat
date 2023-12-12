@@ -168,6 +168,11 @@ void BoardDrawer::RegretAStep(int stepCount){
     int count=0;
     if(AsyncStepResult.valid()) {
         stepCount = 1;
+        //取消异步任务
+        for(auto& player:Players){
+            if(player->EnableAsync)
+                player->Break();
+        }
         StopChatting();
     }
     for(int i=0;i<stepCount;i++)
@@ -186,8 +191,6 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     string current= "CurrentPlayer: ";
     current.append(CurrentPlayer==PieceStatus::Black?"Black":"White");
     DrawText(current.c_str(),20,Board_Size+35,24,BLACK);
-    vector<ChessModel> list;
-    if(!StepHistory.empty())list =CheckModel?ModelChecker::CheckModel(MapData):vector<ChessModel>();
     //应该轮到谁下棋
     IPlayer*player=Players[0]->PlayerColor==CurrentPlayer?Players[0]:Players[1];
     Point p={-1,-1};
@@ -195,7 +198,8 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     if(player->EnableAsync){
         //异步获取下一步
         if(AsyncStepResult.valid()){
-            if(AsyncStepResult.wait_for(std::chrono::seconds(0)) == std::future_status::ready){
+            auto state=AsyncStepResult.wait_for(std::chrono::milliseconds(0));
+            if(state == std::future_status::ready){
                 p=AsyncStepResult.get();
             }
         }else {
@@ -211,22 +215,7 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     ExchangePlayer();
     StepHistory.push(p);
     if(CheckModel) {
-        //region 调试信息
-        cout << "-------------Checked Model Count: " << list.size() << "-------------" << endl;
-        for (const auto &model: list) {
-            cout << "Whose: " << (model.whose == PieceStatus::Black ? "Black" : "White") << endl;
-            cout << "Model: " << ChessModel::GetModelName(model.type) << endl;
-            cout << "Ava: ";
-            for (auto p: model.ava) {
-                cout << p.x << " " << p.y << "   ";
-            }
-            cout << endl;
-            cout << "Points: ";
-            for (auto p: model.points)
-                cout << p.x << " " << p.y << "   ";
-            cout << endl;
-        }
-        //endregion
+        ModelChecker::PrintMapModel(MapData,"Present Map");
     }
     if(sleepTime!=0)this_thread::sleep_for(chrono::milliseconds(sleepTime));
 }

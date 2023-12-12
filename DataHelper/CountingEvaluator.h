@@ -7,7 +7,7 @@
 
 
 #include <vector>
-#include "DataType.h"
+#include "DataType.hpp"
 
 class CountingEvaluator {
 public:

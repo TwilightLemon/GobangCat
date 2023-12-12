@@ -7,7 +7,7 @@
 
 
 #include <vector>
-#include "DataType.h"
+#include "DataType.hpp"
 
 //博弈树的节点
 class ChessNode{
@@ -31,12 +31,16 @@ public:
     [[nodiscard]] Point AlphaBetaSearch();
     //评估对player一方的分数
     int (*Evaluator)(PieceStatus player, const ChessMap& map);
+    //中断搜索
+    bool Stop=false;
     //获取可走点
-    vector<Point> (*AvaPointGenerator)(const ChessMap& map);
+    vector<Point> (*AvaPointGenerator)(const ChessMap& map,int MaxCount);
     ChessNode* root;
     //指示对哪一方有利
     PieceStatus BenefitPlayer;
-    int maxDepth;
+    int MaxDepth;
+    int MaxCount;
+    int MaxRootCount;
 };
 
 #endif //C2023_CHALLENGE_CHESSTREE_H

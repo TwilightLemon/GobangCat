@@ -5,7 +5,7 @@
 #ifndef C2023_CHALLENGE_BOARDDRAWER_H
 #define C2023_CHALLENGE_BOARDDRAWER_H
 #include <raylib.h>
-#include "DataHelper/DataType.h"
+#include "DataHelper/DataType.hpp"
 #include "Player/IPlayer.h"
 
 //region UI绘制相关常量

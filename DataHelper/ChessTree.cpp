@@ -12,38 +12,17 @@ using namespace std::chrono;
 void ChessTree::GenerateTree(int depth, PieceStatus player) {
     InfoBoard::CatSays("待我耕耘一颗树...ᓚᘏᗢ");
     this->BenefitPlayer=player;
-    this->maxDepth=depth;
+    this->MaxDepth=depth;
     this->root=new ChessNode();
     this->root->map=MapData;
     this->root->depth=0;
     this->root->parent= nullptr;
     //第一层节点由对手下产生
     //root下一层的可走点根据现有棋局产生
-    this->root->NextAvaPoints=this->AvaPointGenerator(MapData);
+    this->root->NextAvaPoints=this->AvaPointGenerator(MapData,MaxRootCount);
     this->root->whose=Opponent(player);
 }
 
-void ShowMap(const ChessMap& map,int depth,int alpha,int beta,Point lastp){
-    cout<<"Depth: "<<depth<< "  "<<"LastPoint: "<<lastp.x<<","<<lastp.y<<endl;
-    cout<<"Alpha: "<<alpha<<" Beta: "<<beta<<endl;
-    int count=0;
-    for(int x=0;x<15;x++){
-        for(int y=0;y<15;y++){
-            if(map[y][x]==PieceStatus::None)
-                cout<<"- ";
-            else if(map[y][x]==PieceStatus::Black) {
-                cout << "B ";
-                count++;
-            }
-            else {
-                cout << "W ";
-                count++;
-            }
-        }
-        cout<<endl;
-    }
-    cout<<"Piece Count: "<<count<<endl;
-}
 
 Point ChessTree::AlphaBetaSearch(){
     InfoBoard::CatSays("开始搜索博弈树...");
@@ -68,9 +47,10 @@ Point ChessTree::AlphaBetaSearch(){
         }
     }
 
-    const int depth=this->maxDepth;
+    const int depth=this->MaxDepth;
     int count=0;
     while(true) {
+        if(Stop)return Point{-1,-1};
         //接受回溯过程中的剪枝
         if(parent->alpha>=parent->beta){
             parent->NextAvaPoints.clear();
@@ -140,13 +120,15 @@ Point ChessTree::AlphaBetaSearch(){
                 node->beta = parent->beta;
                 node->map = newMap;
                 //该层节点玩家
-                node->NextAvaPoints = this->AvaPointGenerator(newMap);
+                node->NextAvaPoints = this->AvaPointGenerator(newMap,MaxCount);
                 parent->children.push_back(node);
                 parent = node;
             }
            //此时parent为最底层非叶子节点
            //生成叶子节点，parent为叶子节点的父节点
             while (!parent->NextAvaPoints.empty()) {
+                //直接赢了..
+                if(parent->depth==0)return firstPoint;
                 Point p = parent->NextAvaPoints[0];
                 parent->NextAvaPoints.erase(parent->NextAvaPoints.begin());
                 auto node = new ChessNode();

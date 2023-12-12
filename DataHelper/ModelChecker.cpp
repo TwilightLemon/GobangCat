@@ -8,9 +8,8 @@
 #include "../Player/IPlayer.h"
 #include "CountingEvaluator.h"
 
-
 //可走点生成器
-vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
+vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map,int MaxCount){
     auto list = ModelChecker::CheckModel(map);
     vector<Point> avaPoints;
     int count=0;
@@ -35,7 +34,7 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map){
             count++;
         }
         //限制一次最多添加的点数
-        if(count>=6)break;
+        if(count>=MaxCount)break;
     }
     return avaPoints;
 }
@@ -113,12 +112,11 @@ long long ModelChecker::CheckerTime=0;
 
 //检索双方符合的模型，预判可能的步骤
 vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
-
+  //  ShowMap(map,0,0,0,{0,0});
     auto now=chrono::high_resolution_clock ::now();
     vector<ChessModel> result;
     //region 检索模型
-    auto CheckEmpty=[](array<Point,6>& p,const ChessMap& map)->bool{
-        //如果五个点为空则退出
+    auto CheckEmpty=[](const array<Point,6>& p,const ChessMap& map)->bool{
         bool empty=true;
         int pointCount=6;
         for(int i=0;i<pointCount;i++){
@@ -129,7 +127,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         }
         return empty;
     };
-    auto Check=[&](array<Point,6>& p,ModelType type,const vector<vector<int>>& rules){
+    auto Check=[&](const array<Point,6>& p,ModelType type,const vector<vector<int>>& rules){
         int pointCount=6;
 
         ChessModel Model;
@@ -152,6 +150,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
             for (int i = 0; i < rulesCount; i++) {
                 bool match = true;
                 for (int j = 0; j < pointCount; j++) {
+                    if(p[j].x==-1&&p[j].y==-1)continue;
                     if (rules[i][j] == 1) {
                         if (p[j].EmptyInMap(map)) {
                             match = false;
@@ -269,9 +268,9 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         Check(plist,ModelType::M2,ruleM2);
     };
     //endregion
+    array<array<Point,6>,8> region={{-1,-1}};
     for(int x=0;x<15;x++) {
         for (int y = 0; y < 15; y++) {
-            array<array<Point,6>,10> region={{-1,-1}};
             int count=0;
             //region 遍历所有可能的五个点
             if(y<=10) {
@@ -355,7 +354,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                 }
             }
             //endregion
-            for (int i =0;i<=count;i++) {
+            for (int i =0;i<count;i++) {
                 auto item=region[i];
                 CheckWin(item);
                 CheckH4(item);
@@ -442,4 +441,25 @@ string ChessModel::GetModelName(ModelType type){
         default:
             return "Unknown";
     }
+}
+
+vector<ChessModel> ModelChecker::PrintMapModel(const ChessMap &map,string ptr) {
+    //region 调试信息
+    vector<ChessModel> list = ModelChecker::CheckModel(MapData);
+    cout << "-----"<<ptr<<"--------Checked Model Count: " << list.size() << "-------------" << endl;
+    for (const auto &model: list) {
+        cout << "Whose: " << (model.whose == PieceStatus::Black ? "Black" : "White") << endl;
+        cout << "Model: " << ChessModel::GetModelName(model.type) << endl;
+        cout << "Ava: ";
+        for (auto p: model.ava) {
+            cout << p.x << " " << p.y << "   ";
+        }
+        cout << endl;
+        cout << "Points: ";
+        for (auto p: model.points)
+            cout << p.x << " " << p.y << "   ";
+        cout << endl;
+    }
+    return list;
+    //endregion
 }

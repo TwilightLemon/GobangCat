@@ -15,13 +15,13 @@ add_executable(GobangCat
         InfoBoard.cpp
         InfoBoard.h
         Player/RandomRobot.cpp
-        DataHelper/DataType.h
+        DataHelper/DataType.hpp
+        DataHelper/DataType.cpp
         BoardDrawer.cpp
         BoardDrawer.h
         Player/IPlayer.h
         Player/HumanPlayer.cpp
         Player/ChessTreeRobot.cpp
-        DataHelper/DataType.cpp
         DataHelper/ChessTree.cpp
         DataHelper/ChessTree.h
         DataHelper/ModelChecker.cpp
