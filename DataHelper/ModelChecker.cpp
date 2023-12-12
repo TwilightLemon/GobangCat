@@ -117,7 +117,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     auto now=chrono::high_resolution_clock ::now();
     vector<ChessModel> result;
     //region 检索模型
-    auto Check=[&](array<Point,6>& p,ModelType type,const vector<vector<int>>& rules){
+    auto CheckEmpty=[](array<Point,6>& p,const ChessMap& map)->bool{
         //如果五个点为空则退出
         bool empty=true;
         int pointCount=6;
@@ -127,7 +127,10 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                 break;
             }
         }
-        if(empty)return;
+        return empty;
+    };
+    auto Check=[&](array<Point,6>& p,ModelType type,const vector<vector<int>>& rules){
+        int pointCount=6;
 
         ChessModel Model;
         Model.type=type;
@@ -268,7 +271,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     //endregion
     for(int x=0;x<15;x++) {
         for (int y = 0; y < 15; y++) {
-            array<array<Point,6>,10> region={{0,0}};
+            array<array<Point,6>,10> region={{-1,-1}};
             int count=0;
             //region 遍历所有可能的五个点
             if(y<=10) {
@@ -276,67 +279,84 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                 array<Point,6> q = {{{x,y},{x,y+1},{x,y+2},{x,y+3},{x,y+4},{-1,-1}}};
                 if(y<=9)
                     q[5]={x,y+5};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             if(y>=4){
                 //取纵向-
                 array<Point,6> q = {{{x, y}, {x, y - 1},  {x, y - 2}, {x, y - 3},  {x, y - 4},{-1,-1}}};
                 if(y>=5)
                     q[5]={x,y-5};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             if(x<=10) {
                 //取横向+
                 array<Point,6> q={{{x,y},{x+1,y},{x+2,y},{x+3,y},{x+4,y},{-1,-1}}};
                 if(x<=9)
                     q[5]={x+5,y};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             if(x>=4) {
                 //取横向-
                 array<Point,6> q={{{x, y}, {x - 1, y},  {x - 2, y}, {x - 3, y},  {x - 4, y},{-1,-1}}};
                 if(x>=5)
                     q[5]={x-5,y};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             if(x<=10&&y<=10) {
                 //取左上到右下
                 array<Point,6> q={{{x, y}, {x + 1, y + 1},  {x + 2, y + 2}, {x + 3, y + 3},  {x + 4, y + 4},{-1,-1}}};
                 if(x<=9&&y<=9)
                     q[5]={x+5,y+5};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             if(x>=4&&y>=4) {
                 //取左上到右下
                 array<Point,6> q={{{x, y}, {x - 1, y - 1},  {x - 2, y - 2}, {x - 3, y - 3},  {x - 4, y - 4},{-1,-1}}};
                 if(x>=5&&y>=5)
                     q[5]={x-5,y-5};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             if(x>=4&&y<=10) {
                 //取右上到左下
                 array<Point,6> q={{{x, y}, {x - 1, y + 1},  {x - 2, y + 2}, {x - 3, y + 3},  {x - 4, y + 4},{-1,-1}}};
                 if(x>=5&&y<=9)
                     q[5]={x-5,y+5};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             if(x<=10&&y>=4) {
                 //取右上到左下
                 array<Point,6> q={{{x, y}, {x + 1, y - 1},  {x + 2, y - 2}, {x + 3, y - 3},  {x + 4, y - 4},{-1,-1}}};
                 if(x<=9&&y>=5)
                     q[5]={x+5,y-5};
-                region[count]=q;
-                count++;
+                if(!CheckEmpty(q,map)) {
+                    region[count] = q;
+                    count++;
+                }
             }
             //endregion
-            for (auto &item: region) {
+            for (int i =0;i<=count;i++) {
+                auto item=region[i];
                 CheckWin(item);
                 CheckH4(item);
                 CheckC4(item);

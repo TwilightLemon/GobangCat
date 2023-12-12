@@ -30,7 +30,7 @@ struct Point{
     }
     [[nodiscard]]
     bool EmptyInMap(const ChessMap& map) const{
-        if(x<0||x>=15||y<0||y>=15)return false;
+        if(x<0||x>=15||y<0||y>=15)return true;
         return map[x][y]==PieceStatus::None;
     }
     [[nodiscard]]
