@@ -50,15 +50,15 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
                 score+=1000000*p;
                 break;
                 //不应该为Cube模型计分，因为Cube模型是由其它模型组成的，分数已经计算过了
-/*            case ModelType::Cube4:
+            case ModelType::Cube4:
                 score+=100000*p;
-                break;*/
+                break;
             case ModelType::C4:
                 score+=10000*p;
                 break;
-/*            case ModelType::Cube3:
+            case ModelType::Cube3:
                 score+=1500*p;
-                break;*/
+                break;
             case ModelType::H3:
                 score+=1000*p;
                 break;
@@ -142,6 +142,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
             for (int i = 0; i < rulesCount; i++) {
                 bool match = true;
                 for (int j = 0; j < pointCount; j++) {
+                    if(rules[i].size()<=j)break;
                     if (rules[i][j] == 1) {
                         if (p[j].EmptyInMap(map)) {
                             match = false;
