@@ -84,7 +84,7 @@ graph TD;
     end
 
 ```
-#### 如何走？
+#### 如何走？ (深度优先)
 ```mermaid
 graph TD;
     GenerateTree--生成根节点-->root[root];
@@ -167,6 +167,7 @@ graph
 - 4.直到达到最大深度或无子可下，由Evaluator评估后更新alpha或beta值
 - 5.回溯更新：对于Max节点，alpha=max{本节点alpha,child.alpha,child.beta}；对于Min节点，beta=min{本节点beta,child.alpha,child.beta}
 - 6.剪枝条件：alpha>=beta，不再生成子节点
+- 7.搜索完成之后，检索root的子节点，选择alpha值最大且未被剪枝的节点
 
 ###### 具体在算法中有两处响应剪枝:
 - 生成叶节点时触发
@@ -188,6 +189,7 @@ graph TD;
 ```mermaid
 graph TD;
     first(初代: 简单的连 活 冲模型检测器\n依据模型可知道双方可走点)-->second(优化: 加入二维模型检测, 和一些人工优化\n例如优先走点, 对生成模型进行价值排序, 限制生成器可走点数量等)
+    second-->prob(出现Bug:\n即使已经经过排序, 仍会出现可走点全为对方的情况)-->solve(解决: 分玩家限制可走点数量, 保证生成节点的完整性)
 ```
 ### 3.易用性改善
 ```mermaid

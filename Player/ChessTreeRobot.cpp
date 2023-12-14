@@ -58,10 +58,9 @@ Point ChessTreeRobot::NextStep() {
         for(const auto& p:item.ava)
             AvaPointsOfOpponent.push_back(p);
     //endregion
-    bool Giveup=false;
     if(this->EnableTreeSearch&&StepHistory.size()>=this->SkipStepCount*2) {
         //region 搜索博弈树，预算分数
-        ChessBoard::CatChat("Thinking.....????", WHITE, 30, 9);
+        ChessBoard::CatChat("Thinking.....????!!!", WHITE, 30, 12);
         tree=new ChessTree();
         //装配估值器
         if(this->Evaluator==EvaluatorType::Counting)

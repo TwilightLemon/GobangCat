@@ -58,7 +58,6 @@ Point ChessTree::AlphaBetaSearch() {
         }
         //搜索完成
         if (parent->NextAvaPoints.empty() && parent->depth == 0) {
-            //查找root->children中最大的score
             //#region 生成视图
             int maxScore = INT_MIN;
             for (const auto &node: parent->children) {
@@ -86,12 +85,14 @@ Point ChessTree::AlphaBetaSearch() {
 
             }
             //#endregion
+            //region查找root->children中最大的score
             for (const auto &node: parent->children) {
                 if (node->alpha > maxScore && node->alpha < node->beta) {
                     maxScore = node->alpha;
                     result = node;
                 }
             }
+            //endregion
             break;
         }
         if (!parent->NextAvaPoints.empty()) {
