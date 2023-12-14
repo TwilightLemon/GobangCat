@@ -27,7 +27,7 @@ struct ChatData{
 };
 
 //负责UI绘制和游戏操作
-class BoardDrawer {
+class ChessBoard {
 private:
     //交换玩家
     static void ExchangePlayer();

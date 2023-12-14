@@ -1,6 +1,6 @@
 #include "IPlayer.h"
 #include <raylib.h>
-#include "../BoardDrawer.h"
+#include "../ChessBoard.h"
 
 Point HumanPlayer::NextStep()
 {

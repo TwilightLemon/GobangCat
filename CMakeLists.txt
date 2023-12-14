@@ -17,8 +17,8 @@ add_executable(GobangCat
         Player/RandomRobot.cpp
         DataHelper/DataType.hpp
         DataHelper/DataType.cpp
-        BoardDrawer.cpp
-        BoardDrawer.h
+        ChessBoard.cpp
+        ChessBoard.h
         Player/IPlayer.h
         Player/HumanPlayer.cpp
         Player/ChessTreeRobot.cpp

@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include "InfoBoard.h"
-#include "BoardDrawer.h"
+#include "ChessBoard.h"
 
 auto WhiteColor=[](TextColor color){
     switch (color){
@@ -35,7 +35,7 @@ void DrawCopyRight() {
 }
 void DrawWinCount(){
     int b,w;
-    BoardDrawer::GetWinCount(b,w);
+    ChessBoard::GetWinCount(b, w);
     cout << "\033[32m-----------------------------"<<endl;
     cout << "对局情况: " << endl;
     cout << "Black: " <<b<< endl;

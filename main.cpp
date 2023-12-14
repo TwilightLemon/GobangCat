@@ -1,7 +1,7 @@
 //
 // Created by cz241 on 11/3/2023.
 //
-#include "BoardDrawer.h"
+#include "ChessBoard.h"
 #include "InfoBoard.h"
 
 //region UI常量
@@ -45,7 +45,6 @@ int main(){
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            //尝试无限可能，走稳下一步棋
             ->SetMaxCount(INT_MAX,4)
             ->SetTreeDepth(8);
 
@@ -54,54 +53,54 @@ int main(){
         //region 基础绘制部分：棋盘背景、棋子
         ClearBackground(SKYBLUE);
         //绘制棋盘背景：
-        BoardDrawer::DrawBackground();
+        ChessBoard::DrawBackground();
         //初始时绘制游戏提示框：
         static bool first=true;
         if(StepHistory.empty()&&first){
             first=false;
-            BoardDrawer::CatChat("Tips: Press UP to regret and Enter to restart.",WHITE,3,0);
-            BoardDrawer::CatChat("Good Luck!",WHITE,2,0);
+            ChessBoard::CatChat("Tips: Press UP to regret and Enter to restart.", WHITE, 3, 0);
+            ChessBoard::CatChat("Good Luck!", WHITE, 2, 0);
         }
         //显示上一步
-        BoardDrawer::HighlightLastPoint();
+        ChessBoard::HighlightLastPoint();
         //绘制棋子：
-        BoardDrawer::DrawPieces();
+        ChessBoard::DrawPieces();
         //绘制ChatUI
-        BoardDrawer::AnimateChat(texture_White);
+        ChessBoard::AnimateChat(texture_White);
         //endregion
 
         //region 如果无人胜出则进行一轮博弈
-        BoardDrawer::Round(0,true);
+        ChessBoard::Round(0, true);
         //endregion
 
         //region 判断有无胜出
         bool drew=false;//是否和棋
-        auto winner= BoardDrawer::IfWon(drew);
+        auto winner= ChessBoard::IfWon(drew);
         if(winner!=PieceStatus::None || drew){
             //获胜情况
             string win=drew?"No one":(winner==PieceStatus::Black?"Black":"White");
-            win.append(" won in "+to_string(BoardDrawer::GetSteps())+" steps!");
+            win.append(" won in " + to_string(ChessBoard::GetSteps()) + " steps!");
             DrawRectangle(0,Board_Size/2-10,Board_Size+60,90,BLUE);
             DrawText(win.c_str(),20,Board_Size/2+10,30,WHITE);
             DrawText("Press Enter to Restart",20,Board_Size/2+45,20,WHITE);
             //对局情况
             int WinCount_Black=0,WinCount_White=0;
-            BoardDrawer::GetWinCount(WinCount_Black,WinCount_White);
+            ChessBoard::GetWinCount(WinCount_Black, WinCount_White);
             string black="Black: "+to_string(WinCount_Black)+" times";
             string white="White: "+to_string(WinCount_White)+" times";
             DrawText(black.c_str(),Board_Size-120,Board_Size/2+10,22,WHITE);
             DrawText(white.c_str(),Board_Size-120,Board_Size/2+42,22,WHITE);
 
             if(IsKeyPressed(KEY_ENTER)){
-                BoardDrawer::Restart();
+                ChessBoard::Restart();
             }
         }
         //endregion
 
         //region 悔棋
         if(IsKeyPressed(KEY_UP)){
-            BoardDrawer::CatChat("How dare u to regret?!",RED,2,0);
-            BoardDrawer::RegretAStep(2);
+            ChessBoard::CatChat("How dare u to regret?!", RED, 2, 0);
+            ChessBoard::RegretAStep(2);
         }
         //endregion
 

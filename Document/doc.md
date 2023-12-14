@@ -19,13 +19,13 @@
 - - 命名规范 - 驼峰命名法(略偏向C#/Java)
 - - 链式调用，例如：
 ```c++
-    Players[1] = (new ChessTreeRobot())
-            ->SetPlayer(PieceStatus::White)
-            ->SetEnableTreeSearch(true)
-            ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetTreeDepth(6);
+Players[1] = (new ChessTreeRobot())
+    ->SetPlayer(PieceStatus::White)
+    ->SetEnableTreeSearch(true)
+    ->SetEvaluator(EvaluatorType::ModelChecking)
+    ->SetMaxCount(6,4)
+    ->SetTreeDepth(8);
 ```
-- 面对对象原则 - 封装、继承、抽象、多态
 - MVVM设计模式
 ```mermaid
 graph TD;
@@ -33,8 +33,23 @@ graph TD;
     ViewModel-->Model
     View[View:BoardDrawer UI呈现和基础游戏操作]<-->ViewModel
 ```
+- 面对对象原则 - 封装、继承、抽象、多态
+```mermaid
+graph TD;
+    ip(interface:\nIPlayer)
+    subgraph Composition
+    ip-.虚函数.->NextPoint函数
+    ip-.虚函数.->Break
+    ip-.成员.->EnableAsync
+    ip-.成员.->PlayerColor
+    end;
+    ip-->p(派生)--> HumanPlayer
+    p--> ct[ChessTreeRobot]
+    p--> RandomRobot
+```
+
 ### 1.整体结构
-#### 全局变量 (Model Data)
+#### 主要全局变量 (Model Data)
 ```mermaid
     graph TD
         q[MapData]
@@ -43,14 +58,10 @@ graph TD;
 ```
 #### 游戏基本逻辑构架
 ```mermaid
-graph RL;
+graph LR;
     main[主函数]<--查询数据-->board[ChessBoard\n响应操作和绘制UI]-->Round函数\n进行一轮对局--async-->ip1
     main--游戏操作-->board
     ip[抽象接口IPlayer]-.虚函数.->ip1(NextPoint函数)
-    ip-.成员.->ip2(PlayerColor)
-    ip--派生--> HumanPlayer
-    ip--派生--> ct[ChessTreeRobot]
-    ip--派生--> RandomRobot
 ```
 ### 2.ChessTree
 #### 组成
@@ -75,9 +86,9 @@ graph TD;
 ```
 #### 如何走？
 ```mermaid
-graph LR;
-    GenerateTree-->root[root];
-    root-->g(AvaPointGenerator)-->下一步可走点集-->在newMap中模拟落子-->if{是否达到最大深度\n或不可再走}-->|是|eva(Evaluator)-->评估值
+graph TD;
+    GenerateTree--生成根节点-->root[root];
+    root-->g(AvaPointGenerator)--生成-->下一步可走点集-->在newMap中模拟落子-->if{是否达到最大深度\n或不可再走}-->|是|eva(Evaluator)-->评估值
     if-->|否|g
 ```
 #### 博弈树结构——动态而不确定

@@ -2,7 +2,7 @@
 // Created by cz241 on 11/6/2023.
 //
 
-#include "BoardDrawer.h"
+#include "ChessBoard.h"
 #include "DataHelper/ModelChecker.h"
 #include "InfoBoard.h"
 #include <iostream>
@@ -19,13 +19,13 @@ int WinCount_Black=0,WinCount_White=0;
 //region UI绘制
 
 vector<ChatData> ChatHistory;
-void BoardDrawer::CatChat(string text,Color color,int duration,int animateLength){
+void ChessBoard::CatChat(string text, Color color, int duration, int animateLength){
     ChatHistory.push_back({0,text,color,duration,animateLength});
 }
-void BoardDrawer::StopChatting(){
+void ChessBoard::StopChatting(){
     ChatHistory.clear();
 }
-void BoardDrawer::AnimateChat(Texture icon){
+void ChessBoard::AnimateChat(Texture icon){
     if(ChatHistory.empty())return;
     DrawRectangle(0,Board_Size+60,Board_Size+60,60,BLUE);
     DrawTexture(icon,20,Board_Size+77,WHITE);
@@ -42,13 +42,13 @@ void BoardDrawer::AnimateChat(Texture icon){
     DrawText(str.c_str(),90,Board_Size+78,28,data.ChatColor);
 }
 
-void BoardDrawer::HighlightLastPoint() {
+void ChessBoard::HighlightLastPoint() {
     if(StepHistory.empty())return;
     auto p=StepHistory.top();
     DrawCircle(Margin+p.x*GridSize,Margin+p.y*GridSize,PieceSize+3,PINK);
 }
 
-void BoardDrawer::DrawBackground() {
+void ChessBoard::DrawBackground() {
     //绘制阴阳线：
     for(int i=0;i<15;i++){
         DrawLineEx({Margin,Margin+i*GridSize},{Board_Size+Margin,Margin+i*GridSize},LineThick,BLACK);
@@ -62,7 +62,7 @@ void BoardDrawer::DrawBackground() {
     DrawCircle(Margin+11*GridSize,Margin+11*GridSize,radius,BLACK);
 }
 
-void BoardDrawer::DrawPieces(){
+void ChessBoard::DrawPieces(){
     for(int x=0;x<15;x++){
         for(int y=0;y<15;y++){
             if(MapData[x][y] == PieceStatus::Black){
@@ -76,16 +76,16 @@ void BoardDrawer::DrawPieces(){
 //endregion
 
 //region 获取游戏数据
-int BoardDrawer::GetSteps() {
+int ChessBoard::GetSteps() {
     return StepHistory.size();
 }
 
-void BoardDrawer::GetWinCount(int& black,int& white){
+void ChessBoard::GetWinCount(int& black, int& white){
     black=WinCount_Black;
     white=WinCount_White;
 }
 
-PieceStatus  BoardDrawer::IfWon(bool& drew){
+PieceStatus  ChessBoard::IfWon(bool& drew){
     //TODO:可以从最后一步开始判断，效率更高
 
     Color LineColor=BLUE;
@@ -150,11 +150,11 @@ PieceStatus  BoardDrawer::IfWon(bool& drew){
 //endregion
 
 //region 游戏控制
-void BoardDrawer::ResetStep(){
+void ChessBoard::ResetStep(){
     while(!StepHistory.empty())
         StepHistory.pop();
 }
-void BoardDrawer::Restart() {
+void ChessBoard::Restart() {
     ResetStep();
     //重新开始：
     for(int x=0;x<15;x++)
@@ -164,7 +164,7 @@ void BoardDrawer::Restart() {
     ended=false;
 }
 static std::future<Point> AsyncStepResult;
-void BoardDrawer::RegretAStep(int stepCount){
+void ChessBoard::RegretAStep(int stepCount){
     int count=0;
     if(AsyncStepResult.valid()) {
         stepCount = 1;
@@ -185,7 +185,7 @@ void BoardDrawer::RegretAStep(int stepCount){
     if(count%2==1)ExchangePlayer();
     if(ended)ended=false;
 }
-void BoardDrawer::Round(int sleepTime,bool CheckModel){
+void ChessBoard::Round(int sleepTime, bool CheckModel){
     if(ended)return;
     //绘制当前玩家：
     string current= "CurrentPlayer: ";
@@ -219,7 +219,7 @@ void BoardDrawer::Round(int sleepTime,bool CheckModel){
     }
     if(sleepTime!=0)this_thread::sleep_for(chrono::milliseconds(sleepTime));
 }
-void BoardDrawer::ExchangePlayer() {
+void ChessBoard::ExchangePlayer() {
     CurrentPlayer = CurrentPlayer == PieceStatus::Black ? PieceStatus::White : PieceStatus::Black;
 }
 //endregion

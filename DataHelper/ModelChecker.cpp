@@ -10,7 +10,7 @@
 vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map,int MaxCount){
     auto list = ModelChecker::CheckModel(map);
     vector<Point> avaPoints;
-    int count=0;
+    int count=0,black=0,white=0;
     for (const auto &item: list) {
         //该层对局玩家可能走的点
         int cot=0;
@@ -18,8 +18,8 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map,int MaxCount){
             cot++;
             //P.S. 在GetAvaPoints中限制单个模型点数不影响Cube模型的生成
             //限制单个模型的可走点数
-            int max=(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;
-            if(cot>max)break;
+            /*int max=(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;
+            if(cot>max)break;*/
             //如果该点已经存在，则不重复添加
             bool found = false;
             for (const auto &point: avaPoints)
@@ -28,10 +28,17 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map,int MaxCount){
                     break;
                 }
             if (found)continue;
+
+            //保证双方可走点数不超过MaxCount/2，双方都有子可走
+            if(black>=MaxCount/2&&item.whose==PieceStatus::Black)continue;
+            if(white>=MaxCount/2&&item.whose==PieceStatus::White)continue;
+            if(item.whose==PieceStatus::Black)
+                black++;
+            else white++;
             avaPoints.push_back(p);
             count++;
         }
-        //限制一次最多添加的点数
+        //限制一次最多添加的点数，致命BUG:对方点数过多会影响我方的可走点数
         if(count>=MaxCount)break;
     }
     return avaPoints;
@@ -44,21 +51,21 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
         int p=model.whose==player?1:-1;
         switch (model.type) {
             case ModelType::Win:
-                score+=100000000*p;
+                return 100000000*p;
                 break;
             case ModelType::H4:
                 score+=1000000*p;
                 break;
                 //不应该为Cube模型计分，因为Cube模型是由其它模型组成的，分数已经计算过了
-            case ModelType::Cube4:
+/*            case ModelType::Cube4:
                 score+=100000*p;
-                break;
+                break;*/
             case ModelType::C4:
                 score+=10000*p;
                 break;
-            case ModelType::Cube3:
+/*            case ModelType::Cube3:
                 score+=1500*p;
-                break;
+                break;*/
             case ModelType::H3:
                 score+=1000*p;
                 break;
