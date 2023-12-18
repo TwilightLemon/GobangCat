@@ -50,29 +50,18 @@ class ChessTreeRobot : public IPlayer
         this->PlayerColor=player;
         return this;
     }
-    ChessTreeRobot* SetTreeDepth(int depth){
-        this->TreeDepth=depth;
-        return this;
-    }
     ChessTreeRobot* SetEnableTreeSearch(bool enable){
         this->EnableTreeSearch=enable;
         return this;
     }
-    ChessTreeRobot* SetSkipStepCount(int count){
-        this->SkipStepCount=count;
-        return this;
-    }
-    ChessTreeRobot* SetMaxCount(int Root,int Child){
-        MaxRootCount=Root;
-        MaxCount=Child;
+    ChessTreeRobot* SetDynamicSetter(void setter(int& depth, int& root,int& child)){
+        DynamicSetter=setter;
         return this;
     }
     Point NextStep() override;
+    void (*DynamicSetter)(int& depth, int& root,int& child);
     int TreeDepth=4;
-    int SkipStepCount=0;
     bool EnableTreeSearch=true;
-    int MaxCount=4;
-    int MaxRootCount=6;
     EvaluatorType Evaluator;
 };
 

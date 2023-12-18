@@ -58,7 +58,7 @@ Point ChessTreeRobot::NextStep() {
         for(const auto& p:item.ava)
             AvaPointsOfOpponent.push_back(p);
     //endregion
-    if(this->EnableTreeSearch&&StepHistory.size()>=this->SkipStepCount*2) {
+    if(this->EnableTreeSearch) {
         //region 搜索博弈树，预算分数
         ChessBoard::CatChat("Thinking.....????!!!", WHITE, 30, 12);
         tree=new ChessTree();
@@ -70,9 +70,8 @@ Point ChessTreeRobot::NextStep() {
         else tree->Evaluator=ModelChecker::Evaluate;
         //装配可走点生成器
         tree->AvaPointGenerator=ModelChecker::GetAvaPoints;
-        //设置模拟走子MaxCount
-        tree->MaxCount=MaxCount;
-        tree->MaxRootCount=MaxRootCount;
+        //动态设置树深度、根节点数、子节点数
+        DynamicSetter(this->TreeDepth, tree->MaxRootCount,tree->MaxCount);
         tree->GenerateTree(this->TreeDepth, this->PlayerColor);
         auto result = tree->AlphaBetaSearch();
         delete tree;

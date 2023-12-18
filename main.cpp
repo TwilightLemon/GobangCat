@@ -39,14 +39,33 @@ int main(){
     //加载玩家：
     Players[0] = (new HumanPlayer())
             ->SetPlayer(PieceStatus::Black);
-/*    Players[1] = (new HumanPlayer())
-            ->SetPlayer(PieceStatus::White);*/
     Players[1] = (new ChessTreeRobot())
             ->SetPlayer(PieceStatus::White)
             ->SetEnableTreeSearch(true)
             ->SetEvaluator(EvaluatorType::ModelChecking)
-            ->SetMaxCount(INT_MAX,4)
-            ->SetTreeDepth(8);
+            ->SetDynamicSetter([](int& depth,int &root, int &child) {
+                if (int step = ChessBoard::GetSteps();step < 8) {
+                    depth=4;
+                    root = 4;
+                    child = 4;
+                } else if (step < 20) {
+                    depth=6;
+                    root = 6;
+                    child = 4;
+                } else if (step < 40) {
+                    depth=8;
+                    root = 10;
+                    child = 4;
+                } else if (step < 60) {
+                    depth=8;
+                    root = 15;
+                    child = 4;
+                } else {
+                    depth=10;
+                    root = 15;
+                    child = 6;
+                }
+            });
 
     while(!WindowShouldClose()){
         BeginDrawing();

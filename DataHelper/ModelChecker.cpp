@@ -18,8 +18,8 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map,int MaxCount){
             cot++;
             //P.S. 在GetAvaPoints中限制单个模型点数不影响Cube模型的生成
             //限制单个模型的可走点数 [可选]
-            /*int max=(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;
-            if(cot>max)break;*/
+            int max=(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;
+            if(cot>max)break;
             //如果该点已经存在，则不重复添加
             bool found = false;
             for (const auto &point: avaPoints)

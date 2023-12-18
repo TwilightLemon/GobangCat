@@ -23,7 +23,7 @@ Players[1] = (new ChessTreeRobot())
     ->SetPlayer(PieceStatus::White)
     ->SetEnableTreeSearch(true)
     ->SetEvaluator(EvaluatorType::ModelChecking)
-    ->SetMaxCount(6,4)
+    ->SetDynamicSetter(6,4)
     ->SetTreeDepth(8);
 ```
 - MVVM设计模式
@@ -190,6 +190,7 @@ graph TD;
 graph TD;
     first(初代: 简单的连 活 冲模型检测器\n依据模型可知道双方可走点)-->second(优化: 加入二维模型检测, 和一些人工优化\n例如优先走点, 对生成模型进行价值排序, 限制生成器可走点数量等)
     second-->prob(出现Bug:\n即使已经经过排序, 仍会出现可走点全为对方的情况)-->solve(解决: 分玩家限制可走点数量, 保证生成节点的完整性)
+    solve-->two(再次优化:\n根据棋盘复杂度动态调整搜索深度和每轮试子数)
 ```
 ### 3.易用性改善
 ```mermaid

@@ -1,7 +1,6 @@
 //
 // Created by cz241 on 11/6/2023.
 //
-
 #include "ChessBoard.h"
 #include "DataHelper/ModelChecker.h"
 #include "InfoBoard.h"

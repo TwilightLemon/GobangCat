@@ -7,11 +7,12 @@
 #include "../InfoBoard.h"
 #include "ModelChecker.h"
 #include <chrono>
+#define DEBUG_OUTPUT 1
 
 using namespace std::chrono;
 
 void ChessTree::GenerateTree(int depth, PieceStatus player) {
-    InfoBoard::CatSays("待我耕耘一颗树...ᓚᘏᗢ");
+    InfoBoard::CatSays("待我耕耘一颗树...当前 Depth: " + to_string(depth) + "  MaxRootCount: "+to_string(MaxRootCount)+"  MaxCount:"+to_string(MaxCount));
     this->BenefitPlayer = player;
     this->MaxDepth = depth;
     this->root = new ChessNode();
@@ -26,19 +27,25 @@ void ChessTree::GenerateTree(int depth, PieceStatus player) {
 
 
 Point ChessTree::AlphaBetaSearch() {
+#if DEBUG_OUTPUT
     InfoBoard::CatSays("开始搜索博弈树...");
+#endif
     ModelChecker::CheckerTime = 0;
     auto begin = high_resolution_clock::now();
     ChessNode *result = nullptr;
     if (this->root->NextAvaPoints.size() == 1) {
         //如果root节点只有一个点，则返回root的第一个子节点
+#if DEBUG_OUTPUT
         InfoBoard::CatSays("算了吧 没什么可搜的ㄟ( ▔, ▔ )ㄏ", TextColor::Green);
+#endif
         return root->NextAvaPoints[0];
     }
     Point firstPoint = root->NextAvaPoints[0];
+#if DEBUG_OUTPUT
     for (const auto &point: root->NextAvaPoints) {
         InfoBoard::CatSays("可走点: " + to_string(point.x) + " " + to_string(point.y));
     }
+#endif
     //拷贝一份map
     auto parent = this->root;
     auto newMap = new PieceStatus[15][15];
@@ -58,8 +65,8 @@ Point ChessTree::AlphaBetaSearch() {
         }
         //搜索完成
         if (parent->NextAvaPoints.empty() && parent->depth == 0) {
+#if DEBUG_OUTPUT
             //#region 生成视图
-            int maxScore = INT_MIN;
             for (const auto &node: parent->children) {
                 auto newMape = new PieceStatus[15][15];
                 for (int x = 0; x < 15; x++) {
@@ -85,7 +92,9 @@ Point ChessTree::AlphaBetaSearch() {
 
             }
             //#endregion
+#endif
             //region查找root->children中最大的score
+            int maxScore = INT_MIN;
             for (const auto &node: parent->children) {
                 if (node->alpha > maxScore && node->alpha < node->beta) {
                     maxScore = node->alpha;
