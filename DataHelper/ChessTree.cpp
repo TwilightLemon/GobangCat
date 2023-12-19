@@ -25,6 +25,30 @@ void ChessTree::GenerateTree(int depth, PieceStatus player) {
     this->root->whose = Opponent(player);
 }
 
+//山重水复疑无路，柳暗花明又一村
+//搜索结果发现对手很可能一定胜出，此时选择较为明显的防守点(H3 instead of Cube)
+Point ChessTree::Wayout(){
+    auto list =ModelChecker::CheckModel(MapData);
+    //case1: 在对手有活三和Cube模型，则优先选择对手的活三围堵：
+    bool fdCube=false,fdH3=false;
+    ChessModel H3;
+    for(const auto& item:list){
+        if(item.whose==Opponent(this->BenefitPlayer)) {
+            if ((item.type == ModelType::Cube3 || item.type == ModelType::Cube4)) {
+                fdCube = true;
+            }
+            if (item.type == ModelType::H3) {
+                fdH3 = true;
+                H3=item;
+            }
+            if(fdCube&&fdH3)
+                break;
+        }
+    }
+    if(fdCube&&fdH3)
+    return H3.ava[0];
+    else return Point{-1,-1};
+}
 
 Point ChessTree::AlphaBetaSearch() {
 #if DEBUG_OUTPUT
@@ -99,6 +123,14 @@ Point ChessTree::AlphaBetaSearch() {
                 if (node->alpha > maxScore && node->alpha < node->beta) {
                     maxScore = node->alpha;
                     result = node;
+                }
+            }
+            //预测我方可能必输，此时选择较为明显的防守点
+            if(root->alpha<=-100000000){
+                Point tp=Wayout();
+                if(tp.x!=-1) {
+                    result = nullptr;
+                    firstPoint = tp;
                 }
             }
             //endregion

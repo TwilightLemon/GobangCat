@@ -24,6 +24,7 @@ public:
 };
 
 class ChessTree{
+    Point Wayout();
 public:
     //根据现有局面生成树root并展开第一层
     void GenerateTree(int depth,PieceStatus player);

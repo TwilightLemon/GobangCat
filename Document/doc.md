@@ -19,12 +19,11 @@
 - - 命名规范 - 驼峰命名法(略偏向C#/Java)
 - - 链式调用，例如：
 ```c++
-Players[1] = (new ChessTreeRobot())
-    ->SetPlayer(PieceStatus::White)
+    Players[1] = (new ChessTreeRobot())
+    ->SetPlayer(PieceStatus::Black)
     ->SetEnableTreeSearch(true)
     ->SetEvaluator(EvaluatorType::ModelChecking)
-    ->SetDynamicSetter(6,4)
-    ->SetTreeDepth(8);
+    ->SetDynamicSetter([](int& depth,int &root, int &child) {...});
 ```
 - MVVM设计模式
 ```mermaid
