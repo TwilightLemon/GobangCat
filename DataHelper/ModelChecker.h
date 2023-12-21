@@ -18,20 +18,20 @@ class ChessModel{
 public:
     static string GetModelName(ModelType type);
     //模型类型
-    ModelType type;
+    ModelType Type;
     //符合该模型的所有点坐标
-    vector<Point> points;
+    vector<Point> Points;
     //是谁的模型
-    PieceStatus whose;
+    PieceStatus Whose;
     //空子坐标
-    vector<Point> ava;
+    vector<Point> Ava;
 };
 class ChessModel_Single{
 public:
-    ModelType type;
-    Point ava;
-    Point point;
-    PieceStatus whose;
+    ModelType Type;
+    Point Ava;
+    Point Point;
+    PieceStatus Whose;
 };
 
 class ModelChecker {

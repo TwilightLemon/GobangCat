@@ -55,7 +55,7 @@ Point ChessTreeRobot::NextStep() {
     if(found)
         ChessBoard::CatChat("I‘ve calculated " + to_string(predictCount) + " steps of yours!", WHITE, 3, 0);
     for(const auto &item:list)
-        for(const auto& p:item.ava)
+        for(const auto& p:item.Ava)
             AvaPointsOfOpponent.push_back(p);
     //endregion
     if(this->EnableTreeSearch) {
@@ -79,5 +79,5 @@ Point ChessTreeRobot::NextStep() {
         return result;
         //endregion
     }
-    else return list[0].ava[0];
+    else return list[0].Ava[0];
 }

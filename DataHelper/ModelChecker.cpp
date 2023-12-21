@@ -14,11 +14,11 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map,int MaxCount){
     for (const auto &item: list) {
         //该层对局玩家可能走的点
         int cot=0;
-        for (const auto &p: item.ava) {
+        for (const auto &p: item.Ava) {
             cot++;
             //P.S. 在GetAvaPoints中限制单个模型点数不影响Cube模型的生成
             //限制单个模型的可走点数 [可选]
-            int max=(item.type==ModelType::H2||item.type==ModelType::M2)?1:2;
+            int max= (item.Type == ModelType::H2 || item.Type == ModelType::M2) ? 1 : 2;
             if(cot>max)break;
             //如果该点已经存在，则不重复添加
             bool found = false;
@@ -30,9 +30,9 @@ vector<Point> ModelChecker::GetAvaPoints(const ChessMap& map,int MaxCount){
             if (found)continue;
 
             //保证双方可走点数不超过MaxCount/2，双方都有子可走
-            if(black>=MaxCount/2&&item.whose==PieceStatus::Black)continue;
-            if(white>=MaxCount/2&&item.whose==PieceStatus::White)continue;
-            if(item.whose==PieceStatus::Black)
+            if(black>=MaxCount/2&& item.Whose == PieceStatus::Black)continue;
+            if(white>=MaxCount/2&& item.Whose == PieceStatus::White)continue;
+            if(item.Whose == PieceStatus::Black)
                 black++;
             else white++;
             avaPoints.push_back(p);
@@ -48,8 +48,8 @@ int ModelChecker::Evaluate(PieceStatus player,const ChessMap& map){
     auto mlist=CheckModel(map);
     int score=0;
     for(const auto& model:mlist){
-        int p=model.whose==player?1:-1;
-        switch (model.type) {
+        int p= model.Whose == player ? 1 : -1;
+        switch (model.Type) {
             case ModelType::Win:
                 return 100000000*p;
                 break;
@@ -89,7 +89,7 @@ void ShellSort(vector<ChessModel>& list) {
     ChessModel win;
     bool foundWin=false;
     for(auto item:list) {
-        if (item.type == ModelType::Win) {
+        if (item.Type == ModelType::Win) {
             //如果有五子连珠，则只在list中保留Win模型，删除其它模型
             win = item;
             foundWin = true;
@@ -107,7 +107,7 @@ void ShellSort(vector<ChessModel>& list) {
         for (int i = gap; i < length; i++) {
             temp = list[i];
             int j = i - gap;
-            for (; j >= 0 && list[j].type < temp.type; j -= gap)
+            for (; j >= 0 && list[j].Type < temp.Type; j -= gap)
                 list[j + gap] = list[j];
             list[j + gap] = temp;
             count++;
@@ -130,7 +130,7 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     auto Check=[&](vector<Point>& p,ModelType type,const vector<vector<int>>& rules){
         int pointCount=rules[0].size();
         ChessModel Model;
-        Model.type=type;
+        Model.Type=type;
         vector<Point> ava,points;
 
         int rulesCount=rules.size();
@@ -213,9 +213,9 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
         if(checked){
             for(int i=0;i<pointCount;i++)
                 points.push_back(p[i]);
-            Model.whose=owner;
-            Model.ava=ava;
-            Model.points=points;
+            Model.Whose=owner;
+            Model.Ava=ava;
+            Model.Points=points;
             result.push_back(Model);
         }
 
@@ -369,15 +369,15 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
     int OrdCount=result.size();
     for(int i=0;i<OrdCount;i++){
         auto model=result[i];
-        if(model.type==ModelType::H3||model.type==ModelType::H2||model.type==ModelType::H4||model.type==ModelType::M3) {
-            for (const auto &p: model.ava) {
+        if(model.Type == ModelType::H3 || model.Type == ModelType::H2 || model.Type == ModelType::H4 || model.Type == ModelType::M3) {
+            for (const auto &p: model.Ava) {
                 bool found = false;
                 ChessModel_Single foundModel;
                 for (const auto &item: Checked) {
                     //平行的重复点不是Cube模型
-                    int vec_x = item.ava.x - item.point.x, vec_y = item.ava.y - item.point.y;
-                    int inc_x = p.x - model.points[0].x, inc_y = p.y - model.points[0].y;
-                    if (item.whose == model.whose && item.ava.Equal(p) && (vec_x * inc_y != vec_y * inc_x)) {
+                    int vec_x = item.Ava.x - item.Point.x, vec_y = item.Ava.y - item.Point.y;
+                    int inc_x = p.x - model.Points[0].x, inc_y = p.y - model.Points[0].y;
+                    if (item.Whose == model.Whose && item.Ava.Equal(p) && (vec_x * inc_y != vec_y * inc_x)) {
                         found = true;
                         foundModel = item;
                         break;
@@ -386,26 +386,26 @@ vector<ChessModel> ModelChecker::CheckModel(const ChessMap& map){
                 if (found) {
                     bool added = false;
                     for (const auto &o: Added) {
-                        if (o.Equal(foundModel.ava)) {
+                        if (o.Equal(foundModel.Ava)) {
                             added = true;
                             break;
                         }
                     }
                     if (!added) {
                         ChessModel m;
-                        ModelType most = model.type > foundModel.type ? model.type : foundModel.type;
+                        ModelType most = model.Type > foundModel.Type ? model.Type : foundModel.Type;
                         if (most == ModelType::H2)
-                            m.type = ModelType::Cube3;
+                            m.Type = ModelType::Cube3;
                         else
-                            m.type = ModelType::Cube4;
-                        m.ava.push_back(foundModel.ava);
-                        m.points = model.points;
-                        m.whose = foundModel.whose;
+                            m.Type = ModelType::Cube4;
+                        m.Ava.push_back(foundModel.Ava);
+                        m.Points = model.Points;
+                        m.Whose = foundModel.Whose;
                         result.push_back(m);
-                        Added.push_back(foundModel.ava);
+                        Added.push_back(foundModel.Ava);
                     }
                 } else {
-                    Checked.push_back(ChessModel_Single{model.type, p, model.points[0], model.whose});
+                    Checked.push_back(ChessModel_Single{model.Type, p, model.Points[0], model.Whose});
                 }
             }
         }
@@ -446,15 +446,15 @@ vector<ChessModel> ModelChecker::PrintMapModel(const ChessMap &map,string ptr) {
     vector<ChessModel> list = ModelChecker::CheckModel(MapData);
     cout << "-----"<<ptr<<"--------Checked Model Count: " << list.size() << "-------------" << endl;
     for (const auto &model: list) {
-        cout << "Whose: " << (model.whose == PieceStatus::Black ? "Black" : "White") << endl;
-        cout << "Model: " << ChessModel::GetModelName(model.type) << endl;
+        cout << "Whose: " << (model.Whose == PieceStatus::Black ? "Black" : "White") << endl;
+        cout << "Model: " << ChessModel::GetModelName(model.Type) << endl;
         cout << "Ava: ";
-        for (auto p: model.ava) {
+        for (auto p: model.Ava) {
             cout << p.x << " " << p.y << "   ";
         }
         cout << endl;
         cout << "Points: ";
-        for (auto p: model.points)
+        for (auto p: model.Points)
             cout << p.x << " " << p.y << "   ";
         cout << endl;
     }

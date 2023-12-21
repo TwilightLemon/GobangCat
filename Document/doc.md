@@ -1,3 +1,6 @@
+# Project GobangCat
+#### powered by TwilightLemon
+这是一只不怎么会下五子棋的人工智能猫咪，棋法古怪，棋力看心情
 ## 需求
 游戏体验：
 - [x] 1.基本游戏功能（下子、悔棋、重开）
@@ -62,7 +65,7 @@ graph LR;
     main--游戏操作-->board
     ip[抽象接口IPlayer]-.虚函数.->ip1(NextPoint函数)
 ```
-### 2.ChessTree
+### 2.ChessTree:博弈树搜索算法
 #### 组成
 ```mermaid
 graph TD;
@@ -72,16 +75,6 @@ graph TD;
     tree-.成员.->dep[MaxDepth]
     tree-.方法.->GenerateTree
     tree-.方法.->AlphaBetaSearch
-    subgraph ModelChecker
-        checker-.方法.->get[GetAvaPoint]-->match-->g
-        checker[ModelChecker]-.方法.->match[CheckModel]
-        checker-.方法.->eva[Evaluate]-->match-->e
-    end
-    subgraph CountingEvaluator
-        eval[CountingEvaluator]-.方法.->Evaluate-->e
-        eval-.方法.->GetAvaPoint-->g
-    end
-
 ```
 #### 如何走？ (深度优先)
 ```mermaid
@@ -122,12 +115,12 @@ graph TD
 ```mermaid
 graph LR;
     node[ChessNode]-.成员.->map[map]
-    node-.成员.->p[point]
+    node-.成员.->p[Point]
     node-.成员.->NextAvaPoints[NextAvaPoints]
     node-.成员.->alpha[alpha]
     node-.成员.->beta[beta]
     node-.成员.->depth[depth]
-    node-.成员.->whose[whose]
+    node-.成员.->Whose[Whose]
     node-.成员.->parent[parent]
     node-.成员.->children[children]
 ```
@@ -171,6 +164,53 @@ graph
 ###### 具体在算法中有两处响应剪枝:
 - 生成叶节点时触发
 - 回溯更新时触发
+### 3.ModelChecker:走子预判和评估
+#### 组成
+```mermaid
+graph TD;
+        checker-.方法.->get[GetAvaPoint]-->match-->AvaPointGenerator
+        checker[ModelChecker]-.方法.->match[CheckModel]
+        checker-.方法.->eva[Evaluate]-->match-->Evaluator
+```
+两个方法都会通过CheckModel来检查匹配到的模型，
+每个模型结构如下：
+```mermaid
+graph LR;
+    model[ChessModel]-.成员.->Type[Type:模型类型]
+    model-.成员.->Ava[Ava:可走点集]
+    model-.成员.->w[Whose:该模型属于哪方]
+    model-.成员.->p[Points:符合模型的点坐标集]
+```
+这些模型指示双方可走的点位以及危险等级。
+#### CheckModel方法:传统的眠活冲模型以及二维模型检测
+```mermaid
+graph TD;
+    a[遍历棋局]-->b[根据眠活冲模型匹配]-->c[检索重复的可走点]-->d[以相交的两个模型创建二维模型]
+```
+一些细节:
+```c++
+for (const auto &item: Checked) {
+         //平行的重复点不是Cube模型
+         int vec_x = item.Ava.x - item.Point.x, vec_y = item.Ava.y - item.Point.y;
+         int inc_x = p.x - model.Points[0].x, inc_y = p.y - model.Points[0].y;
+         //要求两模型为同一玩家
+         if (item.Whose == model.Whose && item.Ava.Equal(p) && (vec_x * inc_y != vec_y * inc_x)) {
+                 found = true;
+                 foundModel = item;
+                 break;
+         }
+}
+```
+#### GetAvaPoint方法:根据模型生成可走点
+```mermaid
+graph TD;
+    a[通过ModelChecker生成可走点]--匹配条件-->c[不重复 \ 不超过单个模型可走点量 \ 不超过双方模型可走总量]
+```
+#### Evaluate方法:根据模型评估局势
+```mermaid
+graph TD;
+    a[通过ModelChecker生成模型]-->c[根据模型类型进行赋分]
+```
 
 ## 优化
 ### 1.棋盘数据和树的构建
@@ -180,6 +220,8 @@ graph TD;
     first-.高内存占用.->first
     first(初代: 每个节点生成一个新Map\n树由GenerateTree一次性全部生成到最大深度)-->second(优化: 游戏数据与树的虚拟棋盘分离, 每棵树只需要用一个Map,\n树由AlphaBetaSearch逐层生成, 同时更新Map,回溯时撤销更改)
     second-.优势.->adv(解除了游戏棋盘数据和树的耦合, 降低了内存占用, 有利于异步操作)
+    
+    f[发现bug:\n 按照搜索规则发现无路可走时会摆烂]-->s(解决: 搜索完成发现我方可能必输,则进行人工评判)
 ```
 ### 2.评估函数和可走点生成器
 内置不同的评估函数(和可走点生成器)，以达到不同难度的AI
@@ -187,7 +229,7 @@ graph TD;
 
 ```mermaid
 graph TD;
-    first(初代: 简单的连 活 冲模型检测器\n依据模型可知道双方可走点)-->second(优化: 加入二维模型检测, 和一些人工优化\n例如优先走点, 对生成模型进行价值排序, 限制生成器可走点数量等)
+    first(初代: 简单的眠 活 冲模型检测器\n依据模型可知道双方可走点)-->second(优化: 加入二维模型检测, 和一些人工优化\n例如优先走点, 对生成模型进行价值排序, 限制生成器可走点数量等)
     second-->prob(出现Bug:\n即使已经经过排序, 仍会出现可走点全为对方的情况)-->solve(解决: 分玩家限制可走点数量, 保证生成节点的完整性)
     solve-->two(再次优化:\n根据棋盘复杂度动态调整搜索深度和每轮试子数)
 ```

@@ -33,11 +33,11 @@ Point ChessTree::Wayout(){
     bool fdCube=false,fdH3=false;
     ChessModel H3;
     for(const auto& item:list){
-        if(item.whose==Opponent(this->BenefitPlayer)) {
-            if ((item.type == ModelType::Cube3 || item.type == ModelType::Cube4)) {
+        if(item.Whose == Opponent(this->BenefitPlayer)) {
+            if ((item.Type == ModelType::Cube3 || item.Type == ModelType::Cube4)) {
                 fdCube = true;
             }
-            if (item.type == ModelType::H3) {
+            if (item.Type == ModelType::H3) {
                 fdH3 = true;
                 H3=item;
             }
@@ -46,7 +46,7 @@ Point ChessTree::Wayout(){
         }
     }
     if(fdCube&&fdH3)
-    return H3.ava[0];
+    return H3.Ava[0];
     else return Point{-1,-1};
 }
 
