@@ -1,5 +1,6 @@
 # Project GobangCat
 #### powered by TwilightLemon
+[项目地址](https://github.com/TwilightLemon/GobangCat)  
 这是一只不怎么会下五子棋的人工智能猫咪，棋法古怪，棋力看心情
 ## 需求
 游戏体验：

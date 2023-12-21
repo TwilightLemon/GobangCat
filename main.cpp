@@ -5,6 +5,8 @@
 #include "InfoBoard.h"
 
 //region UI常量
+#define BackgroundColor GetColor(0xffDEB887)
+#define BackgroundColor_Dark GetColor(0xFFCD853F)
 //defined at BoardDrawer.h
 const float Board_Size=840;
 const float Margin =20.0f;
@@ -70,22 +72,22 @@ int main(){
     while(!WindowShouldClose()){
         BeginDrawing();
         //region 基础绘制部分：棋盘背景、棋子
-        ClearBackground(SKYBLUE);
+        ClearBackground(BackgroundColor);
         //绘制棋盘背景：
         ChessBoard::DrawBackground();
         //初始时绘制游戏提示框：
         static bool first=true;
         if(StepHistory.empty()&&first){
             first=false;
-            ChessBoard::CatChat("Tips: Press UP to regret and Enter to restart.", WHITE, 3, 0);
-            ChessBoard::CatChat("Good Luck!", WHITE, 2, 0);
+            ChessBoard::CatChat("Tips: Press UP to regret and Enter to restart.", BLACK, 3, 0);
+            ChessBoard::CatChat("Good Luck!", BLACK, 2, 0);
         }
         //显示上一步
         ChessBoard::HighlightLastPoint();
         //绘制棋子：
         ChessBoard::DrawPieces();
         //绘制ChatUI
-        ChessBoard::AnimateChat(texture_White);
+        ChessBoard::AnimateChat(texture_Black);
         //endregion
 
         //region 如果无人胜出则进行一轮博弈
@@ -99,16 +101,18 @@ int main(){
             //获胜情况
             string win=drew?"No one":(winner==PieceStatus::Black?"Black":"White");
             win.append(" won in " + to_string(ChessBoard::GetSteps()) + " steps!");
-            DrawRectangle(0,Board_Size/2-10,Board_Size+60,90,BLUE);
-            DrawText(win.c_str(),20,Board_Size/2+10,30,WHITE);
-            DrawText("Press Enter to Restart",20,Board_Size/2+45,20,WHITE);
+            DrawRectangle(0,Board_Size/2-10,Board_Size+60,90, BackgroundColor_Dark);
+            DrawRectangle(0,Board_Size/2-10,Board_Size+60,90, BackgroundColor_Dark);
+            DrawRectangle(0,Board_Size/2-10,Board_Size+60,90, BackgroundColor_Dark);
+            DrawText(win.c_str(),20,Board_Size/2+10,30,BLACK);
+            DrawText("Press Enter to Restart",20,Board_Size/2+45,20,BLACK);
             //对局情况
             int WinCount_Black=0,WinCount_White=0;
             ChessBoard::GetWinCount(WinCount_Black, WinCount_White);
             string black="Black: "+to_string(WinCount_Black)+" times";
             string white="White: "+to_string(WinCount_White)+" times";
-            DrawText(black.c_str(),Board_Size-120,Board_Size/2+10,22,WHITE);
-            DrawText(white.c_str(),Board_Size-120,Board_Size/2+42,22,WHITE);
+            DrawText(black.c_str(),Board_Size-120,Board_Size/2+10,22,BLACK);
+            DrawText(white.c_str(),Board_Size-120,Board_Size/2+42,22,BLACK);
 
             if(IsKeyPressed(KEY_ENTER)){
                 ChessBoard::Restart();

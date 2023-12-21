@@ -26,7 +26,7 @@ void ChessBoard::StopChatting(){
 }
 void ChessBoard::AnimateChat(Texture icon){
     if(ChatHistory.empty())return;
-    DrawRectangle(0,Board_Size+60,Board_Size+60,60,BLUE);
+    DrawRectangle(0,Board_Size+60,Board_Size+60,60,GetColor(0xFFCD853F));
     DrawTexture(icon,20,Board_Size+77,WHITE);
     auto data=ChatHistory[0];
     if(data.LastChatTime==0) {
