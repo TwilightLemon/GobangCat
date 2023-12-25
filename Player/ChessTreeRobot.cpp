@@ -47,20 +47,20 @@ Point ChessTreeRobot::NextStep() {
     auto list= ModelChecker::PrintMapModel(MapData,"SUPPLYiNG");
     //region 没有匹配到模型，随便下
     if(list.empty()){
-        ChessBoard::CatChat("Let me play randomly...", WHITE, 1);
+        ChessBoard::CatChat("Let me play randomly...", BLACK, 1);
         return (new RandomRobot())->NextStep();
     }
     //endregion
     //region 猜测对手
     if(found)
-        ChessBoard::CatChat("I‘ve calculated " + to_string(predictCount) + " steps of yours!", WHITE, 3, 0);
+        ChessBoard::CatChat("I‘ve calculated " + to_string(predictCount) + " steps of yours!", BLACK, 3, 0);
     for(const auto &item:list)
         for(const auto& p:item.Ava)
             AvaPointsOfOpponent.push_back(p);
     //endregion
     if(this->EnableTreeSearch) {
         //region 搜索博弈树，预算分数
-        ChessBoard::CatChat("Thinking.....????!!!", WHITE, 30, 12);
+        ChessBoard::CatChat("Thinking.....????!!!", BLACK, 30, 12);
         tree=new ChessTree();
         //装配估值器
         if(this->Evaluator==EvaluatorType::Counting)

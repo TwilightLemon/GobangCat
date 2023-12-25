@@ -40,7 +40,7 @@ public:
     //显示上一步
     static void HighlightLastPoint();
     //聊个天
-    static void CatChat(string text,Color color=WHITE,int duration=3,int animateLength=3);
+    static void CatChat(string text,Color color=BLACK,int duration=3,int animateLength=3);
     static void StopChatting();
     //绘制ChatUI
     static void AnimateChat(Texture icon);
