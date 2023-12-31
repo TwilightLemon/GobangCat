@@ -58,14 +58,10 @@ int main(){
                     depth=8;
                     root = 10;
                     child = 4;
-                } else if (step < 60) {
+                } else {
                     depth=8;
                     root = 15;
                     child = 4;
-                } else {
-                    depth=10;
-                    root = 15;
-                    child = 6;
                 }
             });
 
